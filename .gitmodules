@@ -7,3 +7,6 @@
 [submodule "models/atat/code"]
 	path = models/atat/code
 	url = https://github.com/alercebroker/ATAT
+[submodule "models/atcat/code"]
+	path = models/atcat/code
+	url = https://codeberg.org/zorat/atcat

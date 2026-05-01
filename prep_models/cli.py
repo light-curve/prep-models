@@ -31,6 +31,11 @@ _MODELS: dict = {
         "module": "atat_prep",
         "hf_repo": f"{HF_ORG}/atat",
     },
+    "atcat": {
+        "project": REPO_ROOT / "models" / "atcat",
+        "module": "atcat_prep",
+        "hf_repo": f"{HF_ORG}/atcat",
+    },
 }
 
 
@@ -54,6 +59,44 @@ def _run(model: str, command: str, extra: List[str]) -> None:
         check=True,
         env=env,
     )
+
+
+def _validate_onnx(onnx_dir: Path) -> None:
+    import numpy as np
+    import onnxruntime as rt
+
+    _NP_DTYPE = {
+        "tensor(float)": np.float32,
+        "tensor(double)": np.float64,
+        "tensor(int32)": np.int32,
+        "tensor(int64)": np.int64,
+        "tensor(bool)": np.bool_,
+        "tensor(float16)": np.float16,
+    }
+
+    onnx_files = sorted(onnx_dir.glob("*.onnx"))
+    if not onnx_files:
+        typer.echo(f"Warning: no .onnx files found in {onnx_dir}", err=True)
+        return
+    for path in onnx_files:
+        typer.echo(f"Validating {path.name} with onnxruntime ...")
+        sess = rt.InferenceSession(str(path))
+
+        feeds = {}
+        for inp in sess.get_inputs():
+            dtype = _NP_DTYPE.get(inp.type, np.float32)
+            # Replace dynamic (None/0/string) dims: first dim → batch=2, rest → 1
+            shape = [
+                2 if i == 0 else (d if isinstance(d, int) and d > 0 else 1)
+                for i, d in enumerate(inp.shape)
+            ]
+            typer.echo(f"  input  '{inp.name}': {inp.shape}  → feed shape {shape}")
+            feeds[inp.name] = np.zeros(shape, dtype=dtype)
+
+        outputs = sess.run(None, feeds)
+        for out_meta, out_arr in zip(sess.get_outputs(), outputs):
+            typer.echo(f"  output '{out_meta.name}': {list(out_arr.shape)}")
+        typer.echo(f"  OK: {path.name}")
 
 
 def _model_app(model_name: str) -> typer.Typer:
@@ -88,6 +131,9 @@ def _model_app(model_name: str) -> typer.Typer:
         """Export model to ONNX (one file per aggregation variant)."""
         extra = ["--output-dir", str(output_dir)] if output_dir is not None else []
         _run(model_name, "export", extra)
+
+        onnx_dir = output_dir or (REPO_ROOT / "models" / model_name / "out" / "onnx")
+        _validate_onnx(onnx_dir)
 
     @sub.command("test-data")
     def test_data(
