@@ -1,0 +1,6 @@
+[submodule "models/astromer1/code"]
+	path = models/astromer1/code
+	url = https://github.com/astromer-science/main-code
+[submodule "models/astromer2/code"]
+	path = models/astromer2/code
+	url = https://github.com/astromer-science/main-code

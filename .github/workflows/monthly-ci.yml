@@ -1,0 +1,48 @@
+name: Monthly Model CI
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 1 * *"
+
+jobs:
+  model-pipeline:
+    name: ${{ matrix.model }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        model:
+          - astromer1
+          - astromer2
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Set up Python 3.14
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Sync root environment
+        run: uv sync --frozen
+
+      - name: Run fetch
+        run: uv run prep-models ${{ matrix.model }} fetch
+
+      - name: Run download
+        run: uv run prep-models ${{ matrix.model }} download
+
+      - name: Run export
+        run: uv run prep-models ${{ matrix.model }} export --output-dir out/${{ matrix.model }}/onnx
+
+      - name: Run test-data
+        run: uv run prep-models ${{ matrix.model }} test-data --output-dir out/${{ matrix.model }}/test-data

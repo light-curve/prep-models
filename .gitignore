@@ -1,0 +1,10 @@
+tmp_*/
+out/
+**/.venv/
+**/__pycache__/
+*.pyc
+*.swp
+models/*/weights/
+models/*/data/
+models/*/out/onnx/
+**/*.egg-info/

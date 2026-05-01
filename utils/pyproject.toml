@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "prep-models-utils"
+version = "0.1.0"
+description = "Shared utilities for prep-models model sub-packages"
+requires-python = ">=3.10"
+dependencies = [
+    "requests>=2.28",
+    "tqdm>=4.0",
+    "pyarrow>=12",
+]
+
+[tool.setuptools.packages.find]
+include = ["prep_models_utils*"]
