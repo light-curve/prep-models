@@ -108,11 +108,6 @@ def _model_app(model_name: str) -> typer.Typer:
             "-i",
             help="Directory containing ONNX files (default: models/<name>/out/onnx/).",
         ),
-        test_data_dir: Optional[Path] = typer.Option(
-            None,
-            "--test-data-dir",
-            help="Directory with test parquet files (optional).",
-        ),
         token: Optional[str] = typer.Option(
             None,
             "--token",
@@ -123,7 +118,7 @@ def _model_app(model_name: str) -> typer.Typer:
             False, "--create-repo", help="Create HuggingFace repo if it doesn't exist."
         ),
     ) -> None:
-        """Upload ONNX files (and optionally test data) to HuggingFace."""
+        """Upload ONNX files, README, and LICENSE to HuggingFace."""
         from prep_models.upload import run_upload
 
         hf_repo = _MODELS[model_name]["hf_repo"]
@@ -131,8 +126,8 @@ def _model_app(model_name: str) -> typer.Typer:
         run_upload(
             model_name=model_name,
             hf_repo=hf_repo,
+            model_dir=model_dir,
             onnx_dir=onnx_dir or model_dir / "out" / "onnx",
-            test_data_dir=test_data_dir,
             token=token,
             create_repo=create_repo,
         )

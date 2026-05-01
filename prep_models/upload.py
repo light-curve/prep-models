@@ -1,4 +1,4 @@
-"""Upload ONNX files and test data to HuggingFace."""
+"""Upload ONNX files, test data, README, and LICENSE to HuggingFace."""
 
 from pathlib import Path
 from typing import Optional
@@ -7,13 +7,14 @@ from typing import Optional
 def run_upload(
     model_name: str,
     hf_repo: str,
+    model_dir: Path,
     onnx_dir: Path,
-    test_data_dir: Optional[Path],
     token: Optional[str],
     create_repo: bool,
 ) -> None:
     from huggingface_hub import HfApi
 
+    model_dir = Path(model_dir)
     onnx_dir = Path(onnx_dir)
     api = HfApi(token=token)
 
@@ -21,7 +22,7 @@ def run_upload(
         api.create_repo(repo_id=hf_repo, repo_type="model", exist_ok=True)
         print(f"Repository {hf_repo} ready.")
 
-    # Collect files to upload
+    # Collect ONNX files
     onnx_files = sorted(onnx_dir.glob(f"{model_name}_*.onnx"))
     if not onnx_files:
         raise FileNotFoundError(
@@ -29,19 +30,31 @@ def run_upload(
             "Run 'export' first."
         )
 
-    parquet_files: list[Path] = []
-    if test_data_dir is not None:
-        parquet_files = sorted(Path(test_data_dir).glob(f"{model_name}_*.parquet"))
+    # Collect metadata files from the model directory
+    meta_files: list[tuple[Path, str]] = []
+    for name in ("README.md", "LICENSE"):
+        p = model_dir / name
+        if p.exists():
+            meta_files.append((p, name))
 
-    all_files = onnx_files + parquet_files
-    print(f"Uploading {len(all_files)} file(s) to {hf_repo}:")
-    for f in all_files:
+    print(f"Uploading to {hf_repo}:")
+    for f in onnx_files:
         print(f"  {f.name}")
+    for _, dest in meta_files:
+        print(f"  {dest}")
 
-    for local_path in all_files:
+    for local_path in onnx_files:
         api.upload_file(
             path_or_fileobj=str(local_path),
             path_in_repo=local_path.name,
+            repo_id=hf_repo,
+            repo_type="model",
+        )
+
+    for local_path, dest_name in meta_files:
+        api.upload_file(
+            path_or_fileobj=str(local_path),
+            path_in_repo=dest_name,
             repo_id=hf_repo,
             repo_type="model",
         )

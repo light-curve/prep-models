@@ -1,3 +1,13 @@
+---
+license: mit
+tags:
+  - astronomy
+  - time-series
+  - light-curves
+  - onnx
+library_name: onnx
+---
+
 # Astromer 2
 
 ## Paper
@@ -37,9 +47,9 @@ The model was pretrained on MACHO survey photometry. MACHO light curves consist 
 - `mag` — MACHO instrumental magnitude (typically negative values, e.g. −10 to −3 in the MACHO system)
 - `err` — photometric error; some observations carry large negative sentinel values (e.g. −3000, −9000) indicating bad data — **these are passed through the pipeline as-is without filtering**
 
-## Preprocessing pipeline
+## Preprocessing steps
 
-All steps are implemented in `code/src/data/loaders.py` (`get_loader`) and reproduced in this package's `utils/prep_models_utils/astromer/common.py` (`preprocess_curves`).
+All steps are implemented in `code/src/data/loaders.py` (`get_loader`) and `code/src/data/preprocessing.py`.
 
 ### Step 1 — Windowing
 
@@ -86,7 +96,7 @@ The normalised error column is **not** fed to the encoder. Errors appear only in
 
 Source: `src/data/loaders.py:format_inp_astromer` (`aversion='base'`).
 
-## ONNX interface
+## Inputs (ONNX)
 
 The exported ONNX models use a **user-friendly mask convention** that is the inverse of the internal pipeline:
 
@@ -106,13 +116,10 @@ The ONNX wrapper inverts `mask_in` internally before passing it to the encoder, 
 | `astromer2_max.onnx`  | `[batch, 256]` | Masked max pooling over valid timesteps |
 | `astromer2_full.onnx` | `[batch, 200, 256]` | Full per-timestep sequence; consumer aggregates |
 
+ONNX opset: 13.
+
 ## Weights
 
-Source: Zenodo record [10.5281/zenodo.18207945](https://zenodo.org/doi/10.5281/zenodo.18207945)
+Source: [Zenodo record 18207945](https://zenodo.org/records/18207945)
 Training dataset: MACHO (1.5 million light curves, V and R bands)
 Checkpoint: `astromer_v2/macho/`
-
-## ONNX on HuggingFace
-
-Published at: <https://huggingface.co/light-curve/astromer2>
-License: MIT (same as original model)
