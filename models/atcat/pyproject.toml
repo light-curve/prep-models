@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "atcat-prep"
+version = "0.1.0"
+description = "ATCAT ONNX export sub-package"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "torch>=2.7,<3",
+    "lightning>=2.5,<3",
+    "fiddle==0.3.0",
+    "ply>=3.11",
+    "polars>=1.34,<2",
+    "pyarrow>=18,<21",
+    "scipy>=1.13,<2",
+    "onnx>=1.18",
+    "onnxscript",
+    "gdown>=5.2",
+    "minio",
+    "torcheval",
+    "psutil",
+    "prep-models-utils",
+]
+
+[tool.uv.sources]
+prep-models-utils = { path = "../../utils", editable = true }
+
+[tool.setuptools.packages.find]
+include = ["atcat_prep*"]

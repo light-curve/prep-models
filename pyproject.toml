@@ -10,6 +10,7 @@ requires-python = ">=3.14"
 dependencies = [
     "typer>=0.12",
     "huggingface-hub>=0.20",
+    "onnx>=1.16",
     "onnxruntime>=1.25.1",
 ]
 

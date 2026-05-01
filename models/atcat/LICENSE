@@ -1,0 +1,40 @@
+Copyright (c) 2025 Zora Tung
+
+This work is licensed under the MIT License with the following modifications:
+
+1. The permission grant is subject to the additional condition that the Software
+   shall not be used for Military Purposes.
+
+2. Definitions:
+
+   - "Military Purposes" means any use by, for, or on behalf of:
+     - Any military or armed forces organization (including army, navy, air
+       force, marines, coast guard, space force, or equivalent)
+     - Any defense department or ministry
+     - Any intelligence agency conducting military operations
+     - Any organization or entity primarily engaged in the development,
+       manufacture, or deployment of weapons, weapons systems, or military
+       technologies
+   - Use includes direct use, incorporation into other systems, or provision of
+     services that use this Software for Military Purposes.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, except that the Software shall not be used for
+Military Purposes as defined above. This restriction applies to use, copy,
+modification, merge, publication, distribution, sublicensing, and/or sale of
+copies of the Software, and extends to persons to whom the Software is
+furnished.
+
+The above copyright notice, this permission notice, and the non-military use
+condition shall be included in all copies or substantial portions of the
+Software.
+
+You are explicitly permitted to distribute derived data products under more
+permissive licenses, when those data products are based on publicly available
+astronomical datasets. For example, if you run ATCAT classification on LSST
+alert stream data, if the alert stream data is public domain and made publicly
+available, you may distribute these classifications along with your data release
+without additional licensing terms / restrictions. Please be careful not to
+violate licenses from other works, including any data sources that you may have
+used to train your model.

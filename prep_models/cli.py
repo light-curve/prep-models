@@ -35,6 +35,7 @@ _MODELS: dict = {
         "project": REPO_ROOT / "models" / "atcat",
         "module": "atcat_prep",
         "hf_repo": f"{HF_ORG}/atcat",
+        "onnx_transformations": ["bf16_to_f32"],
     },
 }
 
@@ -78,9 +79,18 @@ def _validate_onnx(onnx_dir: Path) -> None:
     if not onnx_files:
         typer.echo(f"Warning: no .onnx files found in {onnx_dir}", err=True)
         return
+    skipped: list[str] = []
     for path in onnx_files:
         typer.echo(f"Validating {path.name} with onnxruntime ...")
-        sess = rt.InferenceSession(str(path))
+        is_bf16 = path.stem.endswith("_bf16")
+        try:
+            sess = rt.InferenceSession(str(path))
+        except Exception as e:
+            if is_bf16 and "NOT_IMPLEMENTED" in str(e):
+                typer.echo("  Skipped: ORT CPU provider does not support bfloat16 ops.")
+                skipped.append(path.name)
+                continue
+            raise
 
         feeds = {}
         for inp in sess.get_inputs():
@@ -97,6 +107,14 @@ def _validate_onnx(onnx_dir: Path) -> None:
         for out_meta, out_arr in zip(sess.get_outputs(), outputs):
             typer.echo(f"  output '{out_meta.name}': {list(out_arr.shape)}")
         typer.echo(f"  OK: {path.name}")
+
+    if skipped:
+        typer.echo(
+            f"\nWARNING: {len(skipped)} bfloat16 model(s) were not validated"
+            f" ({', '.join(skipped)}) — ORT CPU provider does not support bfloat16 ops."
+            f' Please validate on a CUDA machine using providers=["CUDAExecutionProvider"].',
+            err=True,
+        )
 
 
 def _model_app(model_name: str) -> typer.Typer:
@@ -133,6 +151,20 @@ def _model_app(model_name: str) -> typer.Typer:
         _run(model_name, "export", extra)
 
         onnx_dir = output_dir or (REPO_ROOT / "models" / model_name / "out" / "onnx")
+
+        for transform in _MODELS[model_name].get("onnx_transformations", []):
+            if transform == "bf16_to_f32":
+                from prep_models.onnx_utils import convert_bf16_to_f32
+
+                for bf16_path in sorted(onnx_dir.glob("*_bf16.onnx")):
+                    f32_path = bf16_path.with_stem(
+                        bf16_path.stem.removesuffix("_bf16") + "_f32"
+                    )
+                    typer.echo(f"Converting {bf16_path.name} → {f32_path.name} ...")
+                    convert_bf16_to_f32(bf16_path, f32_path)
+            else:
+                raise ValueError(f"Unknown ONNX transformation: {transform!r}")
+
         _validate_onnx(onnx_dir)
 
     @sub.command("test-data")
