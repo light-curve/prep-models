@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import zipfile
 from pathlib import Path
+
+import gdown
 
 ALCOCK_GDRIVE_ID = "1N4-n3OUAA0J2jFF6fO2MmbykzcxzLEuX"
 ATLAS_GDRIVE_ID = "1OnSF3EULdJpFY4MwRZLgmXa6DauziR8W"
@@ -15,9 +18,6 @@ def download_records(
     *,
     force: bool = False,
 ) -> None:
-    import zipfile
-    import gdown
-
     if not force and any(records_dir.rglob("*.record")):
         print(f"{survey_name} records already present at {records_dir}, skipping.")
         return

@@ -15,8 +15,10 @@ _OBSERVATION_TYPE = pa.struct(
 )
 
 
-def _build_test_data_table(rows: Sequence[dict]) -> pa.Table:
-    embedding_dim = len(rows[0]["embedding_mean"])
+def _build_test_data_table(
+    rows: Sequence[dict], embedding_name: str = "embedding_mean"
+) -> pa.Table:
+    embedding_dim = len(rows[0][embedding_name])
 
     optional_fields = []
     for name, dtype in [
@@ -31,16 +33,18 @@ def _build_test_data_table(rows: Sequence[dict]) -> pa.Table:
         [
             *optional_fields,
             pa.field("lightcurve", pa.list_(_OBSERVATION_TYPE)),
-            pa.field("embedding_mean", pa.list_(pa.float32(), embedding_dim)),
+            pa.field(embedding_name, pa.list_(pa.float32(), embedding_dim)),
         ]
     )
     return pa.Table.from_pylist(list(rows), schema=schema)
 
 
-def save_test_data(rows: Sequence[dict], path: Path) -> None:
+def save_test_data(
+    rows: Sequence[dict], path: Path, embedding_name: str = "embedding_mean"
+) -> None:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    pq.write_table(_build_test_data_table(rows), path)
+    pq.write_table(_build_test_data_table(rows, embedding_name), path)
 
 
 def load_test_data(path: Path) -> pa.Table:

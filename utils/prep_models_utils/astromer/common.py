@@ -6,6 +6,8 @@ from pathlib import Path
 
 import numpy as np
 
+from prep_models_utils.zenodo import download_zenodo_file
+
 
 @dataclass(frozen=True)
 class AstromerConfig:
@@ -50,8 +52,6 @@ def run_encoder_mean(encoder, batch: dict) -> np.ndarray:
 
 
 def download_weights(config: AstromerConfig) -> None:
-    from prep_models_utils.zenodo import download_zenodo_file
-
     download_zenodo_file(
         config.zenodo_record_id,
         config.zenodo_key,

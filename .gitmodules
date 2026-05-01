@@ -4,3 +4,6 @@
 [submodule "models/astromer2/code"]
 	path = models/astromer2/code
 	url = https://github.com/astromer-science/main-code
+[submodule "models/atat/code"]
+	path = models/atat/code
+	url = https://github.com/alercebroker/ATAT

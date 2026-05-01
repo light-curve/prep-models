@@ -26,6 +26,11 @@ _MODELS: dict = {
         "module": "astromer2_prep",
         "hf_repo": f"{HF_ORG}/astromer2",
     },
+    "atat": {
+        "project": REPO_ROOT / "models" / "atat",
+        "module": "atat_prep",
+        "hf_repo": f"{HF_ORG}/atat",
+    },
 }
 
 

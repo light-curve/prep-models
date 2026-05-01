@@ -5,6 +5,8 @@ import tempfile
 import zipfile
 from pathlib import Path
 
+import requests
+
 from .download import download_file
 
 # Repo root: prep_models_utils/zenodo.py -> prep_models_utils/ -> utils/ -> <repo root>
@@ -13,8 +15,6 @@ _REPO_ROOT = Path(__file__).resolve().parents[2]
 
 def get_zenodo_files(record_id: str) -> list:
     """Return the file list for a Zenodo record."""
-    import requests
-
     url = f"https://zenodo.org/api/records/{record_id}"
     r = requests.get(url, timeout=30)
     r.raise_for_status()

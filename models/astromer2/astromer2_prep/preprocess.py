@@ -11,6 +11,7 @@ mask_in semantics (upstream convention):
 from __future__ import annotations
 
 import numpy as np
+import toml
 
 from prep_models_utils.astromer.common import AstromerConfig, add_code_to_path
 
@@ -51,8 +52,6 @@ def preprocess_curves(config: AstromerConfig, curves: list[dict]) -> dict:
 
 
 def load_model_from_checkpoint(code_dir, checkpoint_dir):
-    import toml
-
     add_code_to_path(code_dir)
     from presentation.pipelines.steps.model_design import build_model
 

@@ -9,6 +9,7 @@ from prep_models_utils.astromer import run_test_data as run_shared_test_data
 from prep_models_utils.astromer.surveys import load_mixed_curves
 
 from astromer1_prep.config import CONFIG
+from astromer1_prep.export import _load_model
 from astromer1_prep.preprocess import preprocess_curves as _preprocess_curves
 
 _DATA_DIR = Path(__file__).resolve().parents[1] / "data"
@@ -21,8 +22,6 @@ def _load_curves(n_samples: int) -> list[dict]:
 
 
 def run_test_data(output_dir: Path, n_samples: int = 10) -> None:
-    from astromer1_prep.export import _load_model
-
     run_shared_test_data(
         output_dir,
         n_samples,

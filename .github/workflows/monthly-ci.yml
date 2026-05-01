@@ -13,6 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         model:
+          - atat
           - astromer1
           - astromer2
 
