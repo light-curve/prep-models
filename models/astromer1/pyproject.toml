@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "astromer1-prep"
 version = "0.1.0"
 description = "Astromer 1 ONNX export sub-package"
-requires-python = ">=3.10,<3.11"
+requires-python = ">=3.11,<3.12"
 dependencies = [
     "tensorflow==2.14.*; sys_platform != 'darwin' or platform_machine != 'arm64'",
     "tensorflow-macos==2.14.*; sys_platform == 'darwin' and platform_machine == 'arm64'",

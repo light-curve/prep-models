@@ -6,11 +6,11 @@ build-backend = "setuptools.build_meta"
 name = "astromer2-prep"
 version = "0.1.0"
 description = "Astromer 2 ONNX export sub-package"
-requires-python = ">=3.10,<3.11"
+requires-python = ">=3.11,<3.12"
 dependencies = [
     "joblib",
-    "tensorflow>=2.13; sys_platform != 'darwin' or platform_machine != 'arm64'",
-    "tensorflow-macos>=2.13; sys_platform == 'darwin' and platform_machine == 'arm64'",
+    "tensorflow>=2.13,<2.15; sys_platform != 'darwin' or platform_machine != 'arm64'",
+    "tensorflow-macos>=2.13,<2.15; sys_platform == 'darwin' and platform_machine == 'arm64'",
     "tf2onnx>=1.16",
     "onnx>=1.15,<1.17",
     "numpy<2",
