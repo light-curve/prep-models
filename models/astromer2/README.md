@@ -42,10 +42,11 @@ Default configuration: 6 attention blocks, 4 heads, head dimension 64 (d_model =
 
 ## Input data format
 
-The model was pretrained on MACHO survey photometry. MACHO light curves consist of triples `(mjd, mag, err)` where:
-- `mjd` — Modified Julian Date of each observation (~48800–51700 for MACHO)
-- `mag` — MACHO instrumental magnitude (typically negative values, e.g. −10 to −3 in the MACHO system)
-- `err` — photometric error; some observations carry large negative sentinel values (e.g. −3000, −9000) indicating bad data — **these are passed through the pipeline as-is without filtering**
+Raw light curves are pairs `(time, mag)`:
+- `time` — observation time in days. Need not be absolute MJD; any consistent time axis in days works because the pipeline subtracts the per-window mean before the encoder sees it. The pretrained weights were produced from MACHO data with MJD ~48800–51700.
+- `mag` — magnitude. MACHO instrumental magnitudes are typically negative (e.g. −10 to −3); the pipeline is not restricted to that range.
+
+Photometric errors are **not used** at inference. The upstream preprocessing code expects a 3-column `[time, mag, err]` array internally, but errors only appear in the pretraining reconstruction-loss weights (`outputs['w_error']`), which are never passed to the encoder. Pass dummy zeros if you run the pipeline directly.
 
 ## Preprocessing steps
 
@@ -53,19 +54,24 @@ All steps are implemented in `code/src/data/loaders.py` (`get_loader`) and `code
 
 ### Step 1 — Windowing
 
-If the light curve has more than 200 observations, take the first 200 (non-random, sequential window). If it has fewer than 200, use all observations and pad in step 3.
+The upstream code supports two windowing strategies via the `sampling` flag of `to_windows`:
 
-Source: `src/data/preprocessing.py:to_windows` with `sampling=False`.
+- **`sampling=True` — random window** (used during pretraining): a single contiguous window of 200 observations is drawn at a uniformly random starting position. Light curves shorter than 200 observations are used in full.
+- **`sampling=False` — sequential windows** (used for test-data generation): the light curve is divided into sequential, non-overlapping windows of 200 observations. A light curve of length *L* yields ⌊*L*/200⌋ + 1 windows; the last window may be shorter than 200 and is padded in step 3. Light curves shorter than 200 observations produce a single window. When a light curve produces multiple windows, each window yields a separate embedding vector; to obtain a single per-light-curve embedding, average the per-window embeddings.
+
+Test-data is generated with `sampling=False`.
+
+Source: `src/data/preprocessing.py:to_windows`.
 
 ### Step 2 — Zero-mean normalization
 
-Subtract the per-light-curve column mean from **all three columns** (time, magnitude, error):
+Subtract the per-window column mean from each column:
 
 ```
-x_norm = x - mean(x, axis=0)   # x has shape [n_obs, 3]
+x_norm = x - mean(x, axis=0)   # x has shape [n_obs, 3]; columns: time, mag, err
 ```
 
-After this step, `times` and `input` (magnitudes) are centred around zero. The error column is also normalised but is discarded before the encoder (see step 4).
+After this step `times` = time − mean(time) and `input` = mag − mean(mag) are centred around zero.
 
 Source: `src/data/preprocessing.py:standardize`.
 
@@ -102,8 +108,8 @@ The exported ONNX models use a **user-friendly mask convention** that is the inv
 
 | Tensor | Shape | Description |
 |--------|-------|-------------|
-| `input` | `[batch, 200, 1]` | Zero-mean normalised magnitudes (step 2 above) |
-| `times` | `[batch, 200, 1]` | Zero-mean normalised times (step 2 above) |
+| `input` | `[batch, 200, 1]` | `mag − mean(mag)` over the window (step 2 above) |
+| `times` | `[batch, 200, 1]` | `time − mean(time)` over the window (step 2 above) |
 | `mask_in` | `[batch, 200, 1]` | **1 = valid observation, 0 = padding** |
 
 The ONNX wrapper inverts `mask_in` internally before passing it to the encoder, so consumers can use the intuitive convention.
@@ -123,3 +129,5 @@ ONNX opset: 13.
 Source: [Zenodo record 18207945](https://zenodo.org/records/18207945)
 Training dataset: MACHO (1.5 million light curves, V and R bands)
 Checkpoint: `astromer_v2/macho/`
+
+The test-data parquet file was generated with these MACHO weights and `sampling=False` (sequential windows).
