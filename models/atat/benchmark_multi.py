@@ -19,6 +19,7 @@ import numpy as np
 ONNX_DIR = Path(__file__).resolve().parent / "out" / "onnx"
 N_WARMUP = 5
 N_RUNS = 50
+BATCH_SIZE = 32
 
 
 def _ensure_exports() -> None:
@@ -58,49 +59,59 @@ def _bench(session, feed: dict, n_warmup: int, n_runs: int) -> float:
     return (time.perf_counter() - t0) / n_runs * 1000
 
 
+def _bench_output(
+    session, feed: dict, output_name: str, n_warmup: int, n_runs: int
+) -> float:
+    """Return mean inference time in milliseconds, requesting a single named output."""
+    for _ in range(n_warmup):
+        session.run([output_name], feed)
+    t0 = time.perf_counter()
+    for _ in range(n_runs):
+        session.run([output_name], feed)
+    return (time.perf_counter() - t0) / n_runs * 1000
+
+
 def main() -> None:
     import onnxruntime as ort
 
     _ensure_exports()
 
-    inputs = _make_inputs()
+    inputs = _make_inputs(batch=BATCH_SIZE)
 
     variants = ("token", "mean", "full")
     single_paths = {v: ONNX_DIR / f"atat_{v}.onnx" for v in variants}
     multi_path = ONNX_DIR / "atat_multi.onnx"
 
+    single_sessions = {v: ort.InferenceSession(str(p)) for v, p in single_paths.items()}
+    multi_session = ort.InferenceSession(str(multi_path))
+
     # --- file sizes ---
     print("\n=== File sizes ===")
-    total_single = 0
+    multi_sz_mb = multi_path.stat().st_size / 1024**2
+    print(f"  atat_multi.onnx : {multi_sz_mb:.1f} MB  (shared across all variants)")
     for v, p in single_paths.items():
-        sz = p.stat().st_size / 1024**2
-        total_single += p.stat().st_size
-        print(f"  atat_{v}.onnx : {sz:.1f} MB")
-    print(f"  total (3 files) : {total_single / 1024**2:.1f} MB")
-    multi_sz = multi_path.stat().st_size / 1024**2
-    print(f"  atat_multi.onnx : {multi_sz:.1f} MB")
-    print(f"  ratio multi/total: {multi_path.stat().st_size / total_single:.3f}")
+        print(f"  atat_{v}.onnx   : {p.stat().st_size / 1024**2:.1f} MB")
 
-    # --- latency: running all three single files sequentially ---
-    print(f"\n=== Latency (CPU, batch=4, {N_RUNS} runs after {N_WARMUP} warmup) ===")
-    single_sessions = {v: ort.InferenceSession(str(p)) for v, p in single_paths.items()}
-    total_single_ms = 0.0
+    # --- per-variant latency comparison ---
+    print(
+        f"\n=== Latency per variant (CPU, batch={BATCH_SIZE}, {N_RUNS} runs after {N_WARMUP} warmup) ==="
+    )
+    print(f"  {'variant':<8}  {'single (ms)':>12}  {'multi (ms)':>11}  {'ratio':>7}")
+    print(f"  {'-' * 8}  {'-' * 12}  {'-' * 11}  {'-' * 7}")
     for v, sess in single_sessions.items():
-        ms = _bench(sess, inputs, N_WARMUP, N_RUNS)
-        total_single_ms += ms
-        print(f"  atat_{v}.onnx : {ms:.2f} ms")
-    print(f"  3 files total   : {total_single_ms:.2f} ms")
-
-    multi_session = ort.InferenceSession(str(multi_path))
-    multi_ms = _bench(multi_session, inputs, N_WARMUP, N_RUNS)
-    print(f"  atat_multi.onnx : {multi_ms:.2f} ms")
-    print(f"  speedup multi vs sequential: {total_single_ms / multi_ms:.2f}x")
+        single_ms = _bench(sess, inputs, N_WARMUP, N_RUNS)
+        multi_ms = _bench_output(
+            multi_session, inputs, f"embedding_{v}", N_WARMUP, N_RUNS
+        )
+        print(
+            f"  {v:<8}  {single_ms:>12.2f}  {multi_ms:>11.2f}  {multi_ms / single_ms:>7.2f}x"
+        )
 
     # --- verify outputs match ---
     print("\n=== Numerical consistency ===")
-    single_outs = {v: sess.run(None, inputs)[0] for v, sess in single_sessions.items()}
-    multi_outs = multi_session.run(None, inputs)
-    for (v, single_out), multi_out in zip(single_outs.items(), multi_outs):
+    for v, sess in single_sessions.items():
+        single_out = sess.run(None, inputs)[0]
+        (multi_out,) = multi_session.run([f"embedding_{v}"], inputs)
         max_diff = np.abs(single_out - multi_out).max()
         print(f"  {v}: max |single - multi| = {max_diff:.2e}")
 
