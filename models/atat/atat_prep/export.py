@@ -160,3 +160,82 @@ def run_export(output_dir: Path) -> None:
         dims = [d.dim_value for d in out.type.tensor_type.shape.dim]
         print(f"  Output '{out.name}': {dims}")
     print("Export complete.")
+
+
+class _ATATEmbedderMulti(nn.Module):
+    """Wraps the ATAT Encoder and returns all three aggregation variants in one pass."""
+
+    def __init__(self, encoder: nn.Module) -> None:
+        super().__init__()
+        self.encoder = encoder
+
+    def forward(
+        self,
+        data: torch.Tensor,
+        time: torch.Tensor,
+        mask: torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        emb_x, sorted_mask = self.encoder.time_modulator(data, time, mask)
+
+        has_token = self.encoder.emb_to_classifier == "token"
+        if has_token:
+            bs = emb_x.shape[0]
+            token_rep = self.encoder.token.expand(bs, 1, -1)
+            mask_token = torch.ones(bs, 1, 1, device=emb_x.device)
+            full_mask = torch.cat([mask_token, sorted_mask], dim=1)
+            emb_x = torch.cat([token_rep, emb_x], dim=1)
+        else:
+            full_mask = sorted_mask
+
+        emb_x = self.encoder.transformer(emb_x, full_mask)
+
+        embedding_token = emb_x[:, 0, :] if has_token else emb_x[:, 0, :]
+        seq_emb = emb_x[:, 1:, :] if has_token else emb_x
+        denom = sorted_mask.sum(dim=1).clamp(min=1.0)
+        embedding_mean = (seq_emb * sorted_mask).sum(dim=1) / denom
+        embedding_full = emb_x
+
+        return embedding_token, embedding_mean, embedding_full
+
+
+def run_export_multi(output_dir: Path) -> None:
+    """Export all aggregation variants to a single ONNX file with three outputs."""
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    encoder = load_encoder()
+    wrapper = _ATATEmbedderMulti(encoder)
+    wrapper.eval()
+
+    seq_len = SEQ_LEN
+    n_channels = DATASET_CHANNEL
+    batch = 2
+    dummy = (
+        torch.zeros(batch, seq_len, n_channels),
+        torch.zeros(batch, seq_len, n_channels),
+        torch.ones(batch, seq_len, n_channels),
+    )
+
+    input_names = ["data", "time", "mask"]
+    output_names = ["embedding_token", "embedding_mean", "embedding_full"]
+    dynamic_axes = {name: {0: "batch"} for name in input_names + output_names}
+
+    out_path = output_dir / "atat_multi.onnx"
+    print("Exporting atat_multi.onnx (all variants in one file) ...")
+    torch.onnx.export(
+        wrapper,
+        dummy,
+        str(out_path),
+        input_names=input_names,
+        output_names=output_names,
+        dynamic_axes=dynamic_axes,
+        opset_version=13,
+        dynamo=False,
+    )
+    print(f"  Saved: {out_path}")
+
+    proto = onnx.load(str(out_path))
+    for out in proto.graph.output:
+        dims = [d.dim_value for d in out.type.tensor_type.shape.dim]
+        print(f"  Output '{out.name}': {dims}")
+    print("Multi-output export complete.")
