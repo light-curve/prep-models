@@ -55,6 +55,9 @@ def _rename_onnx_outputs(proto: onnx.ModelProto, names: list[str]) -> onnx.Model
             for i, tensor_name in enumerate(node.output):
                 if tensor_name == old:
                     node.output[i] = new
+            for i, tensor_name in enumerate(node.input):
+                if tensor_name == old:
+                    node.input[i] = new
         for vi in proto.graph.value_info:
             if vi.name == old:
                 vi.name = new
