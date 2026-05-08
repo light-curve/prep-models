@@ -23,11 +23,10 @@ def run_upload(
         print(f"Repository {hf_repo} ready.")
 
     # Collect ONNX files
-    onnx_files = sorted(onnx_dir.glob(f"{model_name}_*.onnx"))
+    onnx_files = sorted(onnx_dir.glob("*.onnx"))
     if not onnx_files:
         raise FileNotFoundError(
-            f"No ONNX files matching '{model_name}_*.onnx' found in {onnx_dir}. "
-            "Run 'export' first."
+            f"No ONNX files found in {onnx_dir}. Run 'export' first."
         )
 
     # Collect metadata files from the model directory

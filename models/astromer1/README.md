@@ -10,6 +10,8 @@ library_name: onnx
 
 # Astromer 1
 
+**HuggingFace:** [light-curve/astromer1](https://huggingface.co/light-curve/astromer1)
+
 ## Paper
 
 Donoso-Oliva, C., Becker, I., Protopapas, P., Cabrera-Vives, G., Forster, F., & Estévez, P. A. (2023). *ASTROMER: A transformer-based embedding for the representation of light curves*. Astronomy & Astrophysics, 670, A54.
@@ -57,11 +59,15 @@ passing to the model (subtract the per-window mean of each).
 
 ## Outputs (ONNX)
 
-| File | Output shape | Aggregation |
-|------|-------------|-------------|
-| `astromer1_mean.onnx` | `[batch, 256]` | Masked mean pooling over valid timesteps |
-| `astromer1_max.onnx` | `[batch, 256]` | Masked max pooling over valid timesteps |
-| `astromer1_full.onnx` | `[batch, 200, 256]` | Full per-timestep sequence |
+Single file `astromer1.onnx` with three named outputs:
+
+| Output name | Shape | Aggregation |
+|-------------|-------|-------------|
+| `mean` | `[batch, 256]` | Masked mean pooling over valid timesteps |
+| `max`  | `[batch, 256]` | Masked max pooling over valid timesteps |
+| `sequence` | `[batch, 200, 256]` | Per-timestep features |
+
+Request only the output(s) you need via `session.run(["mean"], feed)` — onnxruntime will prune unused computation.
 
 ONNX opset: 13.
 

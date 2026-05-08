@@ -76,11 +76,15 @@ The ATAT internal convention uses the same mask sign (1=valid), so no inversion 
 
 ## Outputs (ONNX)
 
-| File | Output shape | Aggregation |
-|------|-------------|-------------|
-| `atat_token.onnx` | `[batch, 192]` | CLS token at position 0 after transformer (used in the paper) |
-| `atat_mean.onnx`  | `[batch, 192]` | Masked mean pooling over sequence positions |
-| `atat_full.onnx`  | `[batch, 1+65×6, 192]` | Full sequence including CLS token at position 0 |
+Single file `atat.onnx` with three named outputs:
+
+| Output name | Shape | Description |
+|-------------|-------|-------------|
+| `token`    | `[batch, 192]` | CLS token at position 0 after transformer (used in the paper) |
+| `mean`     | `[batch, 192]` | Masked mean pooling over per-observation features |
+| `sequence` | `[batch, 65×6, 192]` | Per-observation features (CLS token excluded) |
+
+Request only the output(s) you need via `session.run(["token"], feed)` — onnxruntime will prune unused computation.
 
 ONNX opset: 13.
 
