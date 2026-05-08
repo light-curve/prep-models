@@ -83,16 +83,17 @@ def run_test_data(output_dir: Path, n_samples: int = 10) -> None:
     )
 
     model = load_export_model()
-    embedder = _ATCATEmbedder(model, "token")
+    embedder = _ATCATEmbedder(model)
     embedder.eval()
     with torch.no_grad():
-        embeddings = embedder(
+        embedding_last, _mean, _sequence = embedder(
             torch.from_numpy(flux),
             torch.from_numpy(flux_err),
             torch.from_numpy(time),
             torch.from_numpy(mask),
             torch.from_numpy(channel_index),
-        ).numpy()
+        )
+        embeddings = embedding_last.numpy()
 
     out_path = output_dir / TEST_DATA_FILENAME
     _save(rows, embeddings, out_path)
@@ -115,7 +116,7 @@ def _save(rows: list[dict], embeddings: np.ndarray, path: Path) -> None:
             pa.field("label_atat_fine_class", pa.int32()),
             pa.field("class_name", pa.string()),
             pa.field("lightcurve", pa.list_(lc_type)),
-            pa.field("embedding_token", pa.list_(pa.float32(), embed_dim)),
+            pa.field("embedding_last", pa.list_(pa.float32(), embed_dim)),
         ]
     )
 
@@ -142,7 +143,7 @@ def _save(rows: list[dict], embeddings: np.ndarray, path: Path) -> None:
                 "label_atat_fine_class": int(row["label_atat_fine_class"]),
                 "class_name": row["class_name"],
                 "lightcurve": by_band,
-                "embedding_token": embeddings[i].tolist(),
+                "embedding_last": embeddings[i].tolist(),
             }
         )
 

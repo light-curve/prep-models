@@ -10,6 +10,8 @@ library_name: onnx
 
 # Astromer 2
 
+**HuggingFace:** [light-curve/astromer2](https://huggingface.co/light-curve/astromer2)
+
 ## Paper
 
 Donoso-Oliva, C., Becker, I., Protopapas, P., Cabrera-Vives, G., Cádiz-Leyton, M., & Moreno-Cartagena, D. (2026). *Generalizing across astronomical surveys: Few-shot light curve classification with Astromer 2*. Astronomy & Astrophysics (in press).
@@ -116,11 +118,15 @@ The ONNX wrapper inverts `mask_in` internally before passing it to the encoder, 
 
 ## Outputs (ONNX)
 
-| File | Output shape | Aggregation |
-|------|-------------|-------------|
-| `astromer2_mean.onnx` | `[batch, 256]` | Masked mean pooling: `sum(z * mask_in) / sum(mask_in)` |
-| `astromer2_max.onnx`  | `[batch, 256]` | Masked max pooling over valid timesteps |
-| `astromer2_full.onnx` | `[batch, 200, 256]` | Full per-timestep sequence; consumer aggregates |
+Single file `astromer2.onnx` with three named outputs:
+
+| Output name | Shape | Aggregation |
+|-------------|-------|-------------|
+| `mean` | `[batch, 256]` | Masked mean pooling: `sum(z * mask_in) / sum(mask_in)` |
+| `max`  | `[batch, 256]` | Masked max pooling over valid timesteps |
+| `sequence` | `[batch, 200, 256]` | Per-timestep features |
+
+Request only the output(s) you need via `session.run(["mean"], feed)` — onnxruntime will prune unused computation.
 
 ONNX opset: 13.
 

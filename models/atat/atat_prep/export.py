@@ -1,4 +1,4 @@
-"""Export ATAT LC encoder to ONNX (one file per aggregation variant).
+"""Export ATAT LC encoder to a single ONNX file with three named outputs.
 
 Input convention (ONNX):
     data  [batch, seq_len, 6]  – per-band flux/magnitude
@@ -7,6 +7,11 @@ Input convention (ONNX):
 
 The mask convention matches the ATAT internal convention (1=valid), so no
 inversion is needed here.
+
+Outputs:
+    token    [batch, 192]          – CLS token
+    mean     [batch, 192]          – masked mean pool
+    sequence [batch, seq_len*6, 192] – per-observation features (excl. CLS)
 """
 
 from __future__ import annotations
@@ -76,26 +81,26 @@ def load_encoder() -> nn.Module:
 
 
 class _ATATEmbedder(nn.Module):
-    """Wraps the ATAT Encoder for a single aggregation variant."""
+    """Wraps the ATAT Encoder and returns all three aggregation variants in one pass."""
 
-    def __init__(self, encoder: nn.Module, aggregation: str) -> None:
+    def __init__(self, encoder: nn.Module) -> None:
         super().__init__()
         self.encoder = encoder
-        self.aggregation = aggregation
 
     def forward(
         self,
         data: torch.Tensor,
         time: torch.Tensor,
         mask: torch.Tensor,
-    ) -> torch.Tensor:
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         # data/time/mask: [batch, seq_len, dataset_channel]
         # mask: 1=valid, 0=padding (same as ATAT internal convention)
         emb_x, sorted_mask = self.encoder.time_modulator(data, time, mask)
         # emb_x:       [batch, seq_len*dataset_channel, embed_dim]
         # sorted_mask: [batch, seq_len*dataset_channel, 1]
 
-        if self.encoder.emb_to_classifier == "token":
+        has_token = self.encoder.emb_to_classifier == "token"
+        if has_token:
             bs = emb_x.shape[0]
             token_rep = self.encoder.token.expand(bs, 1, -1)
             mask_token = torch.ones(bs, 1, 1, device=emb_x.device)
@@ -106,66 +111,52 @@ class _ATATEmbedder(nn.Module):
 
         emb_x = self.encoder.transformer(emb_x, full_mask)
 
-        if self.aggregation == "token":
-            return emb_x[:, 0, :]
-
-        # For mean/full we work on the sequence positions only (skip CLS token)
-        has_token = self.encoder.emb_to_classifier == "token"
+        embedding_token = emb_x[:, 0, :]
         seq_emb = emb_x[:, 1:, :] if has_token else emb_x
-        seq_mask = sorted_mask  # [batch, seq_len*dataset_channel, 1]
+        denom = sorted_mask.sum(dim=1).clamp(min=1.0)
+        embedding_mean = (seq_emb * sorted_mask).sum(dim=1) / denom
+        # seq_emb excludes the CLS token, so "sequence" and "token" are non-overlapping
+        embedding_sequence = seq_emb
 
-        if self.aggregation == "mean":
-            denom = seq_mask.sum(dim=1).clamp(min=1.0)
-            return (seq_emb * seq_mask).sum(dim=1) / denom
-        elif self.aggregation == "full":
-            return emb_x  # includes CLS token at position 0 if present
-        else:
-            raise ValueError(f"Unknown aggregation: {self.aggregation!r}")
+        return embedding_token, embedding_mean, embedding_sequence
 
 
 def run_export(output_dir: Path) -> None:
+    """Export all aggregation variants to a single ONNX file ``atat.onnx``."""
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     encoder = load_encoder()
+    wrapper = _ATATEmbedder(encoder)
+    wrapper.eval()
 
-    seq_len = SEQ_LEN
-    n_channels = DATASET_CHANNEL
     batch = 2
     dummy = (
-        torch.zeros(batch, seq_len, n_channels),
-        torch.zeros(batch, seq_len, n_channels),
-        torch.ones(batch, seq_len, n_channels),
+        torch.zeros(batch, SEQ_LEN, DATASET_CHANNEL),
+        torch.zeros(batch, SEQ_LEN, DATASET_CHANNEL),
+        torch.ones(batch, SEQ_LEN, DATASET_CHANNEL),
     )
+
     input_names = ["data", "time", "mask"]
-    dynamic_axes = {name: {0: "batch"} for name in input_names}
+    output_names = ["token", "mean", "sequence"]
+    dynamic_axes = {name: {0: "batch"} for name in input_names + output_names}
 
-    for aggregation in ("token", "mean", "full"):
-        filename = f"atat_{aggregation}.onnx"
-        out_path = output_dir / filename
-        print(f"Exporting {filename} ({aggregation}) ...")
+    out_path = output_dir / "atat.onnx"
+    print("Exporting atat.onnx ...")
+    torch.onnx.export(
+        wrapper,
+        dummy,
+        str(out_path),
+        input_names=input_names,
+        output_names=output_names,
+        dynamic_axes=dynamic_axes,
+        opset_version=13,
+        dynamo=False,
+    )
+    print(f"  Saved: {out_path}")
 
-        wrapper = _ATATEmbedder(encoder, aggregation)
-        wrapper.eval()
-
-        output_name = "embedding"
-        dynamic_axes[output_name] = {0: "batch"}
-
-        torch.onnx.export(
-            wrapper,
-            dummy,
-            str(out_path),
-            input_names=input_names,
-            output_names=[output_name],
-            dynamic_axes=dynamic_axes,
-            opset_version=13,
-            dynamo=False,
-        )
-        print(f"  Saved: {out_path}")
-
-        proto = onnx.load(str(out_path))
-        for out in proto.graph.output:
-            dims = [d.dim_value for d in out.type.tensor_type.shape.dim]
-            print(f"  Output '{out.name}': {dims}")
-
+    proto = onnx.load(str(out_path))
+    for out in proto.graph.output:
+        dims = [d.dim_value for d in out.type.tensor_type.shape.dim]
+        print(f"  Output '{out.name}': {dims}")
     print("Export complete.")

@@ -66,7 +66,7 @@ def _orig_embedder_forward(
         time=embedded.time,
     )
 
-    if aggregation == "token":
+    if aggregation == "last":
         cls_idx = embedded.cls_token_index
         return last_layer.gather(
             dim=1,
@@ -75,7 +75,7 @@ def _orig_embedder_forward(
     if aggregation == "mean":
         mask_f = embedded.mask.unsqueeze(-1).to(last_layer.dtype)
         return (last_layer * mask_f).sum(dim=1) / mask_f.sum(dim=1).clamp(min=1.0)
-    if aggregation == "full":
+    if aggregation == "sequence":
         return last_layer
     raise ValueError(aggregation)
 
@@ -125,12 +125,13 @@ def run_validate() -> None:
     # ── 2. Full embedder: original flex_attention vs patched SDPA ─────────────
     print(f"\n[2] Full embedder: original vs patched  (atol={_ATTN_ATOL})")
     print("    (flex_attention → SDPA introduces small bfloat16 kernel differences)")
+    embedder = _ATCATEmbedder(model_patched)
+    embedder.eval()
     with torch.no_grad():
-        for agg in ("token", "mean", "full"):
+        patched_outputs = dict(zip(("last", "mean", "sequence"), embedder(*inputs)))
+        for agg in ("last", "mean", "sequence"):
             out_orig = _orig_embedder_forward(model_orig, *inputs, agg)
-            embedder = _ATCATEmbedder(model_patched, agg)
-            embedder.eval()
-            out_patched = embedder(*inputs)
+            out_patched = patched_outputs[agg]
             diff = (out_orig.float() - out_patched.float()).abs().max().item()
             status = "OK" if diff <= _ATTN_ATOL else "FAIL"
             print(f"  {agg}: max abs diff = {diff:.2e}  [{status}]")

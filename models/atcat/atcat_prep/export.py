@@ -171,7 +171,7 @@ def _patch_attn_layer(attn: nn.Module) -> None:
 
 
 class _ATCATEmbedder(nn.Module):
-    """ONNX wrapper that exposes ATCAT as a pure embedding model.
+    """ONNX wrapper returning last, mean, and sequence embeddings in one forward pass.
 
     Bypasses embed_input() and schema.embed() (which contain torch._assert calls
     incompatible with ONNX tracing) by driving the lc_embedder and transformer
@@ -179,10 +179,9 @@ class _ATCATEmbedder(nn.Module):
     no metadata embedder).
     """
 
-    def __init__(self, model: nn.Module, aggregation: str) -> None:
+    def __init__(self, model: nn.Module) -> None:
         super().__init__()
         self.model = model
-        self.aggregation = aggregation
         self.embed_dim: int = model.embed_dim
         self.register_buffer(
             "channel_wavelengths",
@@ -197,7 +196,7 @@ class _ATCATEmbedder(nn.Module):
         time: torch.Tensor,
         mask: torch.Tensor,
         channel_index: torch.Tensor,
-    ) -> torch.Tensor:
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         from atcat.layers.embed.embed_inputs import LcInputs
 
         channel_wavelength = self.channel_wavelengths[channel_index]
@@ -219,18 +218,20 @@ class _ATCATEmbedder(nn.Module):
 
         last_layer = self.model.transformer(lc_emb, mask=attn_mask, time=time)
 
-        if self.aggregation == "token":
-            cls_idx = (num_lc_points - 1).clamp(min=0)
-            return last_layer.gather(
-                dim=1,
-                index=cls_idx.unsqueeze(1).unsqueeze(2).expand(-1, 1, self.embed_dim),
-            ).squeeze(1)
-        if self.aggregation == "mean":
-            mask_f = attn_mask.unsqueeze(-1).to(last_layer.dtype)
-            return (last_layer * mask_f).sum(dim=1) / mask_f.sum(dim=1).clamp(min=1.0)
-        if self.aggregation == "full":
-            return last_layer
-        raise ValueError(f"Unknown aggregation: {self.aggregation!r}")
+        cls_idx = (num_lc_points - 1).clamp(min=0)
+        embedding_last = last_layer.gather(
+            dim=1,
+            index=cls_idx.unsqueeze(1).unsqueeze(2).expand(-1, 1, self.embed_dim),
+        ).squeeze(1)
+
+        mask_f = attn_mask.unsqueeze(-1).to(last_layer.dtype)
+        embedding_mean = (last_layer * mask_f).sum(dim=1) / mask_f.sum(dim=1).clamp(
+            min=1.0
+        )
+
+        embedding_sequence = last_layer
+
+        return embedding_last, embedding_mean, embedding_sequence
 
 
 def load_export_model() -> nn.Module:
@@ -262,32 +263,26 @@ def run_export(output_dir: Path) -> None:
         torch.zeros(batch, seq_len, dtype=torch.int64),
     )
     input_names = ["flux", "flux_err", "time", "mask", "channel_index"]
+    output_names = ["last", "mean", "sequence"]
+    dynamic_axes = {name: {0: "batch"} for name in input_names + output_names}
 
-    dynamic_axes = {name: {0: "batch"} for name in input_names}
-    dynamic_axes["embedding"] = {0: "batch"}
-
-    for aggregation in ("token", "mean", "full"):
-        filename = f"{OUTPUT_PREFIX}_{aggregation}_bf16.onnx"
-        out_path = output_dir / filename
-        print(f"Exporting {filename} ...")
-
-        wrapper = _ATCATEmbedder(model, aggregation)
-        wrapper.eval()
-
-        torch.onnx.export(
-            wrapper,
-            dummy,
-            str(out_path),
-            input_names=input_names,
-            output_names=["embedding"],
-            dynamic_axes=dynamic_axes,
-            opset_version=18,
-            dynamo=False,
-        )
-
-        proto = onnx.load(str(out_path))
-        for out in proto.graph.output:
-            dims = [d.dim_value for d in out.type.tensor_type.shape.dim]
-            print(f"  Output '{out.name}': {dims}")
-
+    wrapper = _ATCATEmbedder(model)
+    wrapper.eval()
+    out_path = output_dir / f"{OUTPUT_PREFIX}_bf16.onnx"
+    print(f"Exporting {out_path.name} ...")
+    torch.onnx.export(
+        wrapper,
+        dummy,
+        str(out_path),
+        input_names=input_names,
+        output_names=output_names,
+        dynamic_axes=dynamic_axes,
+        opset_version=18,
+        dynamo=False,
+    )
+    print(f"  Saved: {out_path}")
+    proto = onnx.load(str(out_path))
+    for out in proto.graph.output:
+        dims = [d.dim_value for d in out.type.tensor_type.shape.dim]
+        print(f"  Output '{out.name}': {dims}")
     print("Export complete.")

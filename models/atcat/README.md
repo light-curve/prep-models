@@ -9,6 +9,8 @@ library_name: onnx
 
 # ATCAT
 
+**HuggingFace:** [light-curve/atcat](https://huggingface.co/light-curve/atcat)
+
 ## Paper
 
 Tung, Z. (2025). *ATCAT: Astronomical Timeseries CAusal Transformer*. arXiv:2511.00614.
@@ -49,11 +51,19 @@ The current export targets the upstream LC-only core model (`results/elasticc/CO
 
 ## Outputs (ONNX)
 
-| File | Shape | Aggregation |
-|------|-------|-------------|
-| `atcat_token.onnx` | `[batch, 384]` | Hidden state used by the upstream classifier (last valid token) |
-| `atcat_mean.onnx` | `[batch, 384]` | Masked mean pool of transformer outputs |
-| `atcat_full.onnx` | `[batch, 243, 384]` | Full padded transformer output sequence |
+Two files are produced with the same three named outputs:
+
+Two files are produced, both with the same three named outputs:
+
+| Output name | Shape | Aggregation |
+|-------------|-------|-------------|
+| `last` | `[batch, 384]` | Hidden state at the last valid LC observation (position `num_lc_points-1`) |
+| `mean`  | `[batch, 384]` | Masked mean pool of transformer outputs |
+| `sequence` | `[batch, 243, 384]` | Per-timestep transformer features (`last` is the final valid element of this) |
+
+`atcat_bf16.onnx` is the direct export (bfloat16 weights). `atcat_f32.onnx` is generated automatically by `prep-models atcat export` by stripping the bfloat16 casts.
+
+Request only the output(s) you need via `session.run(["token"], feed)` — onnxruntime will prune unused computation.
 
 ## Preprocessing steps
 

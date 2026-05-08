@@ -93,11 +93,12 @@ def run_test_data(output_dir: Path, n_samples: int = 10) -> None:
 
     print("Loading model and computing token embeddings ...")
     encoder = load_encoder()
-    embedder = _ATATEmbedder(encoder, "token")
+    embedder = _ATATEmbedder(encoder)
     embedder.eval()
 
     with torch.no_grad():
-        embeddings = embedder(data_t, time_t, mask_t).numpy()
+        embedding_token, _, _ = embedder(data_t, time_t, mask_t)
+        embeddings = embedding_token.numpy()
 
     out_path = output_dir / TEST_DATA_FILENAME
     _save(curves, embeddings, out_path)

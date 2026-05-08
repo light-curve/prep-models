@@ -12,7 +12,7 @@ Each HuggingFace repository carries the original model's license and a README wi
 | [Astromer 1](models/astromer1/README.md) | TensorFlow 2.14 | [light-curve/astromer1](https://huggingface.co/light-curve/astromer1) | implemented |
 | [Astromer 2](models/astromer2/README.md) | TensorFlow 2.14 | [light-curve/astromer2](https://huggingface.co/light-curve/astromer2) | implemented |
 | [ATAT](models/atat/README.md) | PyTorch | pending (no upstream license — see [alercebroker/ATAT#2](https://github.com/alercebroker/ATAT/issues/2)) | implemented |
-| [ATCAT](models/atcat/README.md) | PyTorch | pending (custom upstream license; review before publishing) | in progress |
+| [ATCAT](models/atcat/README.md) | PyTorch | [light-curve/atcat](https://huggingface.co/light-curve/atcat) | implemented |
 
 ## Architecture
 
@@ -60,15 +60,20 @@ uv run python -m prep_models astromer2 export
 
 ## Export outputs
 
-Each `export` command produces ONNX files, one per aggregation strategy.
-Astromer 1/2 use `mean`/`max`/`full`; ATAT and ATCAT use `token`/`mean`/`full` (no max pooling).
+Each `export` command produces a single ONNX file (or two for ATCAT: fp32 + bf16) with multiple named outputs.
+Request only the output(s) you need — onnxruntime prunes unused computation.
 
-| File | Aggregation | Output shape |
-|------|-------------|--------------|
-| `<model>_token.onnx` | CLS token (ATAT only) | `[batch, embedding_dim]` |
-| `<model>_mean.onnx` | Masked mean pooling | `[batch, embedding_dim]` |
-| `<model>_max.onnx` | Masked max pooling (Astromer only) | `[batch, embedding_dim]` |
-| `<model>_full.onnx` | No pooling (full sequence) | `[batch, seq_len, embedding_dim]` |
+| Model | File(s) | Output names |
+|-------|---------|--------------|
+| Astromer 1 | `astromer1.onnx` | `mean`, `max`, `sequence` |
+| Astromer 2 | `astromer2.onnx` | `mean`, `max`, `sequence` |
+| ATAT | `atat.onnx` | `token`, `mean`, `sequence` |
+| ATCAT | `atcat_bf16.onnx`, `atcat_f32.onnx` | `last`, `mean`, `sequence` |
+
+`sequence` is the per-element transformer output (`[batch, seq_len, embedding_dim]`); for ATAT the CLS token is excluded.
+`token` (ATAT only) is the CLS token — a dedicated global representation prepended to the sequence and excluded from `sequence`.
+`last` (ATCAT only) is the hidden state at the last valid LC observation (`sequence[num_lc_points-1]`), a convenience slice of `sequence`.
+`mean` / `max` are masked pooling over the sequence (`[batch, embedding_dim]`).
 
 ## Development
 
