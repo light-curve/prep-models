@@ -67,10 +67,19 @@ Request only the output(s) you need via `session.run(["token"], feed)` — onnxr
 
 ## Preprocessing steps
 
-1. Use the upstream ATCAT ELAsTiCC-derived Parquet data format or convert your data into the same padded-per-object sequence fields.
-2. Keep sequence order chronological as expected by the upstream preprocessing.
-3. Pad sequences to length 243 and set `mask=0` for padding positions.
-4. Encode LSST bands as `u, g, r, i, z, Y -> 0, 1, 2, 3, 4, 5`.
+Prepare inputs using the same pipeline applied during training (`step1_mask_alert_and_join.py`, `polars_ds.py`):
+
+1. **Merge all bands into a single chronological sequence.** Collect all observations across all six bands, sort by time, and represent each observation's band as a `channel_index`: `u=0, g=1, r=2, i=3, z=4, Y=5`.
+
+2. **Shift time to start at zero.** Subtract the minimum MJD in the object's light curve from all observation times. Supply time in **days**.
+
+3. **No flux normalisation.** Pass raw flux and flux_err values without any normalisation. Both are in SNANA FLUXCAL units with reference zero point ZP = 27.5 (a source at 27.5 AB mag has FLUXCAL = 1). The model applies a multi-scale tanh transformation internally.
+
+4. **Zero-pad to length 243.** If the object has fewer than 243 observations, right-pad `flux`, `flux_err`, `time`, and `channel_index` with zeros to length 243.
+
+5. **Set the mask.** Set `mask = 1` for every slot containing a real observation and `mask = 0` for every padding slot.
+
+> **Note:** The training data was filtered to the transient detection window: observations from 30 days before the first detection through the last detected photometry. Data far outside this window is out of distribution for this model.
 
 ## Weights
 

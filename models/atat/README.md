@@ -50,29 +50,25 @@ The model was trained on the ELAsTiCC simulation dataset which emulates LSST pho
 
 ## Preprocessing steps
 
-The ELASTICC data pipeline (in `datasets.py`) applies the following steps before passing data to the encoder:
+Prepare inputs using the same pipeline applied during training (`get_lc_md.py`):
 
-1. Load multi-band light curve from `.h5` file: `data [seq_len, 6]`, `time [seq_len, 6]`, `mask [seq_len, 6]`.
-2. Mask out outlier observations (flux > median ± 5σ, or error > median ± 5σ per band).
-3. Right-pad each band's sequence to `seq_len = 65` with zeros; set `mask = 0` for padding positions.
-4. No global normalisation of flux or time is applied in the data loader — the time modulator handles time scaling internally via `T_max = 1500`.
+1. **Split by band.** Separate observations into 6 per-band sequences in the order `[u, g, r, i, z, Y]`. Each band gets an independent sequence of `(time, flux)` pairs.
 
-For inference with the ONNX model, prepare inputs accordingly:
-- `data`: per-band flux values, `float32`, shape `[batch, 65, 6]`
-- `time`: per-band observation times (same units as training, 0–1500 range), `float32`, shape `[batch, 65, 6]`
-- `mask`: `1` for real observations, `0` for padding, `float32`, shape `[batch, 65, 6]`
+2. **Pad or downsample to 65 per band.** If a band has fewer than 65 observations, right-pad with zeros to length 65. If a band has more than 65 observations, downsample to 65 by selecting indices `linspace(0, n−1, 65)` (uniform subsampling, not truncation). The result is `data [65, 6]` and `time [65, 6]`; padding positions hold `0.0`.
 
-Bands are ordered `[u, g, r, i, z, Y]` (indices 0–5).
+3. **Set the mask.** Set `mask = 1` for every slot containing a real observation and `mask = 0` for every padding slot. This is a direct validity indicator — set it based on how many real observations each band has, not derived from flux values.
+
+4. **Shift time to start at zero.** Subtract the minimum observed time (across all bands, ignoring padding slots) from all valid time entries. Padding time slots remain `0.0`. Supply time in **days**; the model's internal time modulator uses `T_max = 1500` days, so it is calibrated for light curves spanning up to roughly four years.
+
+5. **No flux normalisation.** Pass raw flux values without any normalisation. The model was trained on SNANA FLUXCAL with reference zero point ZP = 27.5 (a source at 27.5 AB mag has FLUXCAL = 1). Inputs from a different photometric system or flux scale are outside the training distribution and may produce poor embeddings.
 
 ## Inputs (ONNX)
 
 | Tensor | Shape | Description |
 |--------|-------|-------------|
-| `data` | `[batch, 65, 6]` | Per-band flux (no global normalisation) |
-| `time` | `[batch, 65, 6]` | Per-band observation times (0–1500) |
+| `data` | `[batch, 65, 6]` | Per-band flux, SNANA FLUXCAL (ZP = 27.5), no normalisation |
+| `time` | `[batch, 65, 6]` | Per-band observation times in days, shifted so earliest valid observation = 0; padding slots = 0 |
 | `mask` | `[batch, 65, 6]` | **1 = valid observation, 0 = padding** |
-
-The ATAT internal convention uses the same mask sign (1=valid), so no inversion is applied.
 
 ## Outputs (ONNX)
 
