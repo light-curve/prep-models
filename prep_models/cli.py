@@ -37,6 +37,11 @@ _MODELS: dict = {
         "hf_repo": f"{HF_ORG}/atcat",
         "onnx_transformations": ["bf16_to_f32"],
     },
+    "astrom3": {
+        "project": REPO_ROOT / "models" / "astrom3",
+        "module": "astrom3_prep",
+        "hf_repo": f"{HF_ORG}/astrom3",
+    },
 }
 
 
