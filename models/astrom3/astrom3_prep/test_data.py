@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
 
 import numpy as np
@@ -14,23 +15,36 @@ from astrom3_prep.export import _AstroM3Embedder, load_export_model
 
 # 10 variable-star classes from the AstroM3 dataset
 _CLASS_NAMES = ["EW", "SR", "EA", "RRAB", "EB", "ROT", "RRC", "HADS", "M", "DSCT"]
+_N_CLASSES = len(_CLASS_NAMES)
 
 
 def _load_rows(n_samples: int) -> list[dict]:
     from datasets import load_dataset
 
     ds = load_dataset(HF_DATA_REPO, name="full_0", split="test")
-    rows = []
-    for i, item in enumerate(ds):
-        if i >= n_samples:
+
+    # Collect at least ceil(n_samples / n_classes) samples per class so the
+    # output is spread across all variable-star types.
+    per_class = math.ceil(n_samples / _N_CLASSES)
+    buckets: dict[int, list[dict]] = {i: [] for i in range(_N_CLASSES)}
+    for item in ds:
+        lbl = int(item["label"])
+        if len(buckets[lbl]) < per_class:
+            buckets[lbl].append(item)
+        if all(len(v) >= per_class for v in buckets.values()):
             break
+
+    # Interleave classes so the parquet isn't sorted by class
+    raw = [item for items in zip(*buckets.values()) for item in items][:n_samples]
+
+    rows = []
+    for i, item in enumerate(raw):
         photometry = item["photometry"]
         if not isinstance(photometry, torch.Tensor):
             photometry = torch.tensor(photometry, dtype=torch.float32)
         else:
             photometry = photometry.float()
 
-        # Pad or trim to SEQ_LEN
         n = photometry.shape[0]
         if n >= SEQ_LEN:
             photo_padded = photometry[:SEQ_LEN]
@@ -61,7 +75,7 @@ def run_test_data(output_dir: Path, n_samples: int = 10) -> None:
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"Loading {n_samples} samples from {HF_DATA_REPO} ...")
+    print(f"Loading {n_samples} class-diverse samples from {HF_DATA_REPO} ...")
     rows = _load_rows(n_samples)
 
     x_enc = torch.stack([r["photometry"] for r in rows])  # (N, 200, 9)
@@ -71,7 +85,7 @@ def run_test_data(output_dir: Path, n_samples: int = 10) -> None:
     embedder = _AstroM3Embedder(model)
     embedder.eval()
     with torch.no_grad():
-        mean_emb, _, _ = embedder(x_enc, mask)
+        mean_emb, _ = embedder(x_enc, mask)
     embeddings = mean_emb.numpy()  # (N, 128)
 
     out_path = output_dir / TEST_DATA_FILENAME
@@ -102,7 +116,6 @@ def _save(rows: list[dict], embeddings: np.ndarray, path: Path) -> None:
                 "object_id": row["object_id"],
                 "label": label,
                 "class_name": class_name,
-                # Store as list of per-feature arrays for easy inspection
                 "photometry": [
                     photo_np[:, ch].tolist() for ch in range(photo_np.shape[1])
                 ],
