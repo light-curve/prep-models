@@ -57,26 +57,39 @@ Single file `astrom3.onnx` with two named outputs:
 
 ## Preprocessing steps
 
-The 9 input channels per timestep are, in order:
+The 9 input channels per timestep are built by `preprocess_lc()` in the
+upstream dataset (`AstroMLCore/AstroM3Dataset`):
 
-| Index | Feature |
-|-------|---------|
-| 0 | Time (MJD) |
-| 1 | Magnitude / flux |
-| 2 | Magnitude / flux error |
-| 3 | Amplitude |
-| 4 | Period (Lomb-Scargle) |
-| 5 | LKSL statistic |
-| 6 | RFR score |
-| 7 | MAD (median absolute deviation) |
-| 8 | Δt (time between consecutive observations) |
+| Index | Feature | How obtained |
+|-------|---------|--------------|
+| 0 | `time` (HJD scaled to [0, 1]) | per-observation |
+| 1 | `flux` = `(flux − mean) / MAD` | per-observation |
+| 2 | `flux_err` = `flux_err / MAD` | per-observation |
+| 3 | `amplitude` | **ASAS-SN catalog scalar, replicated to every timestep** |
+| 4 | `period` | **ASAS-SN catalog scalar, replicated** |
+| 5 | `lksl_statistic` (Lafler-Kinman string length) | **ASAS-SN catalog scalar, replicated** |
+| 6 | `rfr_score` (Random Forest classifier score) | **ASAS-SN catalog scalar, replicated** |
+| 7 | `log10(MAD_flux)` | global scalar computed from LC, replicated |
+| 8 | `delta_t` = `(max_HJD − min_HJD) / 365` | global scalar computed from LC, replicated |
 
-Global features (amplitude, period, LKSL, RFR, MAD) are replicated across all timesteps following the upstream preprocessing in `AstroMLCore/AstroM3Processed`.
+Features 3–6 come directly from the ASAS-SN v-band variable-star catalog
+(Jayasinghe et al. 2019) and are **not recomputed** from the light curve by
+this codebase. Users applying this model to non-ASAS-SN data must provide
+equivalent values (e.g. run a Lomb-Scargle period finder and compute
+peak-to-peak amplitude themselves).
 
-1. Build the per-timestep feature matrix as described above.
-2. Sort observations chronologically.
-3. Pad or center-crop to 200 timesteps; set `mask=0` for padded positions.
-4. Use `float32` for all tensors.
+Preprocessing recipe for a single light curve:
+
+1. Deduplicate and sort observations by HJD.
+2. Compute `mean` and `MAD` of the flux column; normalize flux and flux_err.
+3. Scale HJD to [0, 1] over the span of the light curve.
+4. Compute `log10(MAD_flux)` and `delta_t = (max_HJD − min_HJD) / 365`.
+5. Obtain `amplitude`, `period`, `lksl_statistic`, `rfr_score` from the
+   ASAS-SN catalog (or compute equivalents).
+6. Tile the 6 global scalars across all timesteps; concatenate with columns
+   0–2 to produce an `(N, 9)` array.
+7. Pad or center-crop to 200 timesteps; set `mask = 0` for padded positions.
+8. Use `float32` for all tensors.
 
 ## Weights
 
