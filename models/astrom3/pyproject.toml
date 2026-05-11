@@ -13,6 +13,7 @@ dependencies = [
     "huggingface-hub>=0.26",
     "datasets>=2.17",
     "onnx>=1.18",
+    "onnxruntime>=1.18",
     "pyarrow>=18,<21",
     "prep-models-utils",
 ]

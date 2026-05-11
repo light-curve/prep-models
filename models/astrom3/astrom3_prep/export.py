@@ -61,7 +61,7 @@ class _AstroM3Embedder(nn.Module):
         self,
         x_enc: torch.Tensor,  # (batch, seq_len, enc_in)
         mask: torch.Tensor,  # (batch, seq_len) float32 — 1=valid, 0=pad
-    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         enc_out = self.enc_embedding(x_enc)  # (B, 200, 128)
         enc_out, _ = self.encoder(enc_out, attn_mask=None)  # (B, 200, 128)
         enc_out = self.dropout(enc_out)
@@ -69,13 +69,9 @@ class _AstroM3Embedder(nn.Module):
         mask_f = mask.unsqueeze(-1)  # (B, 200, 1)
 
         mean_out = (enc_out * mask_f).sum(1) / mask_f.sum(1).clamp(min=1.0)
+        sequence_out = enc_out  # unmasked; caller applies mask when needed
 
-        neg_inf = torch.full_like(enc_out, -1e9)
-        max_out = torch.where(mask_f > 0.5, enc_out, neg_inf).max(1).values
-
-        sequence_out = enc_out  # unmasked; user applies mask when needed
-
-        return mean_out, max_out, sequence_out
+        return mean_out, sequence_out
 
 
 def load_export_model() -> nn.Module:
@@ -97,14 +93,14 @@ def run_export(output_dir: Path) -> None:
         torch.ones(2, SEQ_LEN, dtype=torch.float32),
     )
     input_names = ["x_enc", "mask"]
-    output_names = ["mean", "max", "sequence"]
+    output_names = ["mean", "sequence"]
     dynamic_axes = {name: {0: "batch"} for name in input_names + output_names}
 
     wrapper = _AstroM3Embedder(model)
     wrapper.eval()
 
     out_path = output_dir / f"{OUTPUT_PREFIX}.onnx"
-    print(f"Exporting {out_path.name} (mean, max, sequence) ...")
+    print(f"Exporting {out_path.name} (mean, sequence) ...")
 
     torch.onnx.export(
         wrapper,

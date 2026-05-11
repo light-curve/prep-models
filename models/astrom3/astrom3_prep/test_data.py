@@ -9,13 +9,11 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import torch
 
-from astrom3_prep.config import (
-    CLASS_NAMES,
-    HF_DATA_REPO,
-    SEQ_LEN,
-    TEST_DATA_FILENAME,
-)
+from astrom3_prep.config import HF_DATA_REPO, SEQ_LEN, TEST_DATA_FILENAME
 from astrom3_prep.export import _AstroM3Embedder, load_export_model
+
+# 10 variable-star classes from the AstroM3 dataset
+_CLASS_NAMES = ["EW", "SR", "EA", "RRAB", "EB", "ROT", "RRC", "HADS", "M", "DSCT"]
 
 
 def _load_rows(n_samples: int) -> list[dict]:
@@ -97,7 +95,7 @@ def _save(rows: list[dict], embeddings: np.ndarray, path: Path) -> None:
     table_rows = []
     for i, row in enumerate(rows):
         label = row["label"]
-        class_name = CLASS_NAMES[label] if label < len(CLASS_NAMES) else str(label)
+        class_name = _CLASS_NAMES[label] if label < len(_CLASS_NAMES) else str(label)
         photo_np = row["photometry"].numpy()  # (200, 9)
         table_rows.append(
             {

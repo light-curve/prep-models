@@ -6,6 +6,7 @@ tags:
   - variable-stars
   - onnx
 library_name: onnx
+license: cc-by-4.0
 ---
 
 # AstroM3 (photo encoder)
@@ -29,7 +30,8 @@ Rizhko, M. et al. (2024). *AstroM³: A self-supervised multimodal model for astr
 
 ## License
 
-MIT License — see [LICENSE](LICENSE).
+- **Code** (this repository): MIT — see [LICENSE](LICENSE).
+- **Model weights** (`AstroMLCore/AstroM3-CLIP-photo`): Creative Commons Attribution 4.0 (CC BY 4.0).
 
 ## Model overview
 
@@ -46,12 +48,11 @@ The photo encoder is an [Informer](https://ojs.aaai.org/index.php/AAAI/article/v
 
 ## Outputs (ONNX)
 
-Single file `astrom3.onnx` with three named outputs:
+Single file `astrom3.onnx` with two named outputs:
 
 | Output | Shape | Aggregation |
 |--------|-------|-------------|
 | `mean` | `[batch, 128]` | Masked mean pool of encoder outputs |
-| `max` | `[batch, 128]` | Masked max pool of encoder outputs |
 | `sequence` | `[batch, 200, 128]` | Full per-timestep encoder outputs (unmasked) |
 
 ## Preprocessing steps

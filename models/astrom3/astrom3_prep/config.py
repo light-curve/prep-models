@@ -21,6 +21,3 @@ ACTIVATION = "gelu"
 
 OUTPUT_PREFIX = "astrom3"
 TEST_DATA_FILENAME = "astrom3_test.parquet"
-
-# 10 variable-star classes used in the upstream ELAsTiCC dataset
-CLASS_NAMES = ["EW", "SR", "EA", "RRAB", "EB", "ROT", "RRC", "HADS", "M", "DSCT"]
