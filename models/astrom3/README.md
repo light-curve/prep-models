@@ -68,7 +68,7 @@ upstream dataset (`AstroMLCore/AstroM3Dataset`):
 | 3 | `amplitude` | **ASAS-SN catalog scalar, replicated to every timestep** |
 | 4 | `period` | **ASAS-SN catalog scalar, replicated** |
 | 5 | `lksl_statistic` (Lafler-Kinman string length) | **ASAS-SN catalog scalar, replicated** |
-| 6 | `rfr_score` (Random Forest classifier score) | **ASAS-SN catalog scalar, replicated** |
+| 6 | `rfr_score` (Random Forest Regressor R² for phase-folded LC) | **ASAS-SN catalog scalar, replicated** |
 | 7 | `log10(MAD_flux)` | global scalar computed from LC, replicated |
 | 8 | `delta_t` = `(max_HJD − min_HJD) / 365` | global scalar computed from LC, replicated |
 
@@ -95,6 +95,47 @@ Preprocessing recipe for a single light curve:
 
 Source: <https://huggingface.co/AstroMLCore/AstroM3-CLIP-photo>
 
-The `model.safetensors` file contains the full CLIP model; this wrapper extracts weights under the `photometry_encoder.*` prefix and loads them into a standalone Informer.
+The `model.safetensors` file is a standalone Informer checkpoint (classification head present but unused; loaded with `strict=False`).
 
-Dataset: ZTF variable-star light curves from the MACC catalog (`AstroMLCore/AstroM3Processed`).
+Dataset: ASAS-SN v-band variable-star light curves (`AstroMLCore/AstroM3Processed`).
+
+## Applying the model without ASAS-SN catalog features
+
+Features 3–6 require the ASAS-SN catalog. For users applying the model to
+other surveys, we measured the sensitivity of the mean embedding to each
+feature being replaced. `rfr_score` was studied in detail.
+
+### rfr_score substitution
+
+`rfr_score` is the R² of a Random Forest Regressor fit to the phase-folded
+light curve; it quantifies period quality
+(Jayasinghe et al. 2019, MNRAS 486 1907, §5; arXiv:1809.07329).
+In the ASAS-SN test set it ranges from −3.5 to 1.18 (median ≈ 0.38).
+
+Setting all timesteps to the constant **0.392** (the empirical optimum,
+equal to the dataset median) minimises mean cosine distance from the
+true-feature embeddings:
+
+| Metric | Value |
+|--------|-------|
+| Overall mean cosine distance | 0.049 ± 0.091 |
+| Macro-average per class | 0.049 ± 0.058 |
+
+Per-class breakdown (5 samples per class from the ASAS-SN test split):
+
+| Class | Mean dist | Std | True rfr mean |
+|-------|-----------|-----|---------------|
+| EW    | 0.005 | 0.005 | −0.07 |
+| SR    | 0.004 | 0.003 | +0.50 |
+| EA    | 0.060 | 0.032 | +0.95 |
+| RRAB  | 0.020 | 0.011 | +0.83 |
+| EB    | 0.016 | 0.011 | +0.90 |
+| ROT   | 0.002 | 0.002 | +0.85 |
+| RRC   | 0.147 | 0.115 | −0.79 |
+| HADS  | 0.016 | 0.011 | +0.59 |
+| M     | 0.050 | 0.020 | +0.18 |
+| DSCT  | 0.170 | 0.182 | −0.86 |
+
+Classes whose true rfr mean is far from 0.39 (RRC, DSCT) are most affected.
+Using an out-of-range value (e.g. ±100) causes cosine distances ~0.93–0.97,
+so staying within the training distribution is important.
