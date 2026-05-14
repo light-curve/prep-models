@@ -13,3 +13,6 @@
 [submodule "models/astrom3/code"]
 	path = models/astrom3/code
 	url = https://github.com/MeriDK/AstroM3
+[submodule "models/seldon/code"]
+	path = models/seldon/code
+	url = https://github.com/skai-institute/seldon
