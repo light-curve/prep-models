@@ -42,6 +42,11 @@ _MODELS: dict = {
         "module": "astrom3_prep",
         "hf_repo": f"{HF_ORG}/astrom3",
     },
+    "astronet-tinho": {
+        "project": REPO_ROOT / "models" / "astronet-tinho",
+        "module": "astronet_tinho_prep",
+        "hf_repo": f"{HF_ORG}/astronet-tinho",
+    },
 }
 
 
