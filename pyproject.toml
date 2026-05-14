@@ -19,3 +19,6 @@ prep-models = "prep_models.cli:app"
 
 [tool.setuptools.packages.find]
 include = ["prep_models*"]
+
+[tool.ruff]
+exclude = ["models/*/code"]
