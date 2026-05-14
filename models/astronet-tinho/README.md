@@ -78,31 +78,12 @@ Two trained variants are available (both included in the upstream repository):
 
 | File                  | Output shape | Description |
 |-----------------------|--------------|-------------|
-| `tinho_gr.onnx`       | [B, 14]      | Softmax class probabilities (14 PLAsTiCC classes) |
-| `tinho_ugrizy.onnx`   | [B, 14]      | Softmax class probabilities (14 PLAsTiCC classes) |
+| `tinho_gr.onnx`       | [B, 32]      | Embedding from GlobalAveragePooling1D |
+| `tinho_ugrizy.onnx`   | [B, 32]      | Embedding from GlobalAveragePooling1D |
 
-Output index → PLAsTiCC class ID → class name:
-
-| Index | Class ID | Name        |
-|-------|----------|-------------|
-| 0     | 90       | SNIa        |
-| 1     | 67       | SNIa-91bg   |
-| 2     | 52       | SNIax       |
-| 3     | 42       | SNII        |
-| 4     | 62       | SNIbc       |
-| 5     | 95       | SLSN-I      |
-| 6     | 15       | TDE         |
-| 7     | 64       | KN          |
-| 8     | 88       | AGN         |
-| 9     | 92       | RRL         |
-| 10    | 65       | M-dwarf     |
-| 11    | 16       | EB          |
-| 12    | 53       | Mira        |
-| 13    | 6        | μ-Lens-Single |
-
-**Note:** the class-index ordering above is the one produced by the label encoder
-used during training (`sklearn.preprocessing.LabelEncoder` fit on sorted class IDs).
-Verify with the `get_encoding` utility in the upstream repo if in doubt.
+The output is taken from the `GlobalAveragePooling1D` layer (before the final
+weight-clustered Dense+softmax classifier), giving a 32-dimensional embedding
+of the light-curve sequence.
 
 ## Preprocessing steps
 
