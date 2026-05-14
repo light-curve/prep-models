@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "astrom3-prep"
+version = "0.1.0"
+description = "AstroM3 photo encoder ONNX export sub-package"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "torch>=2.4,<3",
+    "safetensors>=0.4",
+    "huggingface-hub>=0.26",
+    "datasets>=2.17",
+    "onnx>=1.18",
+    "onnxruntime>=1.18",
+    "pyarrow>=18,<21",
+    "prep-models-utils",
+]
+
+[tool.uv.sources]
+prep-models-utils = { path = "../../utils", editable = true }
+
+[tool.setuptools.packages.find]
+include = ["astrom3_prep*"]

@@ -16,6 +16,7 @@ dependencies = [
     "prep-models-utils",
     "astropy>=6.1.7",
     "pandas>=1.5,<3",
+    "onnxruntime>=1.14",
 ]
 
 [tool.uv.sources]

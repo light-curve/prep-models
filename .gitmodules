@@ -10,3 +10,6 @@
 [submodule "models/atcat/code"]
 	path = models/atcat/code
 	url = https://codeberg.org/zorat/atcat
+[submodule "/workdir/prep-models/models/astrom3/code"]
+	path = /workdir/prep-models/models/astrom3/code
+	url = https://github.com/MeriDK/AstroM3
