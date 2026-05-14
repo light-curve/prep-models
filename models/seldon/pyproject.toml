@@ -1,0 +1,25 @@
+[project]
+name = "seldon-prep"
+version = "0.1.0"
+description = "ONNX export utilities for SELDON (Supernova Explosions Learned by Deep ODE Networks)"
+requires-python = ">=3.9"
+dependencies = [
+    "torch>=2.0",
+    "torchode @ git+https://github.com/martenlienen/torchode",
+    "torchdiffeq",
+    "omegaconf",
+    "onnx",
+    "onnxruntime",
+    "numpy",
+    "prep-models-utils @ ../../utils",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["seldon_prep"]
+
+[tool.uv.sources]
+prep-models-utils = { path = "../../utils" }
