@@ -82,6 +82,12 @@ def load_export_model() -> nn.Module:
 
 
 def run_export(output_dir: Path) -> None:
+    from astrom3_prep.validate import run_validate
+
+    print("=== Patch validation ===")
+    run_validate()
+    print("========================\n")
+
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 

@@ -11,6 +11,8 @@ license: cc-by-4.0
 
 # AstroM3 (photo encoder)
 
+**HuggingFace:** [light-curve/astrom3](https://huggingface.co/light-curve/astrom3)
+
 ## Paper
 
 Rizhko, M. et al. (2024). *AstroM³: A self-supervised multimodal model for astronomy*. arXiv:2411.08842.

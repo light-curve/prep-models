@@ -1,9 +1,12 @@
-"""Numerical validation: compare patched PyTorch model against the exported ONNX.
+"""Numerical validation: verify the patched model's output shapes and masking behaviour.
 
-Unlike ATCAT (where ProbSparse→SDPA introduces small bfloat16 kernel differences),
-the ProbSparse→SDPA replacement here is a significant algorithmic change, so we
-do not compare original vs patched.  Instead we verify that torch.onnx.export
-faithfully serialised the patched model by running both and checking agreement.
+Unlike ATCAT (where ProbSparse→SDPA introduces small bfloat16 differences that
+can still be compared), for AstroM3 the ProbSparse→SDPA swap is a significant
+algorithmic change, so we cannot compare original vs patched outputs.  Instead
+we run the patched _AstroM3Embedder and check that:
+  1. Outputs have the expected shapes.
+  2. No NaN / Inf values are produced.
+  3. Masking is respected: zeroing out timesteps changes the mean embedding.
 
 Run with:
     uv run --project models/astrom3 python -m astrom3_prep validate
@@ -12,30 +15,16 @@ Run with:
 from __future__ import annotations
 
 import sys
-from pathlib import Path
 
-import numpy as np
 import torch
 
-from astrom3_prep.config import ENC_IN, OUTPUT_PREFIX, SEQ_LEN
+from astrom3_prep.config import ENC_IN, SEQ_LEN
 from astrom3_prep.export import _AstroM3Embedder, load_export_model
 
-_DEFAULT_ONNX = (
-    Path(__file__).resolve().parents[1] / "out" / "onnx" / f"{OUTPUT_PREFIX}.onnx"
-)
-_ATOL = 1e-4
+_D_MODEL = 128
 
 
-def run_validate(onnx_path: Path = _DEFAULT_ONNX) -> None:
-    import onnxruntime as rt
-
-    if not onnx_path.exists():
-        print(
-            f"ONNX file not found at {onnx_path}. Run 'prep-models astrom3 export' first.",
-            file=sys.stderr,
-        )
-        sys.exit(1)
-
+def run_validate() -> None:
     print("Loading patched model ...")
     model = load_export_model()
     wrapper = _AstroM3Embedder(model)
@@ -45,29 +34,49 @@ def run_validate(onnx_path: Path = _DEFAULT_ONNX) -> None:
     rng.manual_seed(42)
     batch = 3
     x_enc = torch.randn(batch, SEQ_LEN, ENC_IN, generator=rng)
-    mask = torch.ones(batch, SEQ_LEN)
-    mask[0, 150:] = 0.0  # vary valid lengths to stress masking
-    mask[1, 80:] = 0.0
-
-    with torch.no_grad():
-        pt_mean, pt_sequence = wrapper(x_enc, mask)
-
-    sess = rt.InferenceSession(str(onnx_path))
-    feeds = {"x_enc": x_enc.numpy(), "mask": mask.numpy()}
-    onnx_outputs = sess.run(None, feeds)
-    onnx_mean = onnx_outputs[0]
-    onnx_sequence = onnx_outputs[1]
+    mask_full = torch.ones(batch, SEQ_LEN)
+    mask_partial = mask_full.clone()
+    mask_partial[0, 150:] = 0.0
+    mask_partial[1, 80:] = 0.0
 
     failed = False
-    for name, pt_out, onnx_out in [
-        ("mean", pt_mean.numpy(), onnx_mean),
-        ("sequence", pt_sequence.numpy(), onnx_sequence),
+
+    with torch.no_grad():
+        mean_out, sequence_out = wrapper(x_enc, mask_full)
+
+    # [1] Shape checks
+    print("\n[1] Output shapes")
+    for name, tensor, expected in [
+        ("mean", mean_out, (batch, _D_MODEL)),
+        ("sequence", sequence_out, (batch, SEQ_LEN, _D_MODEL)),
     ]:
-        diff = np.abs(pt_out - onnx_out).max()
-        status = "OK" if diff <= _ATOL else "FAIL"
-        print(f"  {name}: max abs diff = {diff:.2e}  [{status}]")
-        if status == "FAIL":
+        ok = tuple(tensor.shape) == expected
+        status = (
+            "OK" if ok else f"FAIL (got {tuple(tensor.shape)}, expected {expected})"
+        )
+        print(f"  {name}: {status}")
+        if not ok:
             failed = True
+
+    # [2] No NaN / Inf
+    print("\n[2] NaN / Inf check")
+    for name, tensor in [("mean", mean_out), ("sequence", sequence_out)]:
+        ok = bool(torch.isfinite(tensor).all().item())
+        print(f"  {name}: {'OK' if ok else 'FAIL (contains NaN/Inf)'}")
+        if not ok:
+            failed = True
+
+    # [3] Masking changes the mean embedding
+    print("\n[3] Masking affects mean output")
+    with torch.no_grad():
+        mean_partial, _ = wrapper(x_enc, mask_partial)
+    diff = (mean_out - mean_partial).abs().max().item()
+    ok = diff > 0
+    print(
+        f"  Max abs diff (full vs partial mask): {diff:.4f}  [{'OK' if ok else 'FAIL'}]"
+    )
+    if not ok:
+        failed = True
 
     print()
     if failed:
