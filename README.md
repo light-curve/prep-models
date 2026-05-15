@@ -10,6 +10,7 @@ Each HuggingFace repository carries the original model's license and a README wi
 | Model | Framework | HuggingFace | Status |
 |-------|-----------|-------------|--------|
 | [Astromer 1](models/astromer1/README.md) | TensorFlow 2.14 | [light-curve/astromer1](https://huggingface.co/light-curve/astromer1) | implemented |
+| [Astromer 1 (ZTF DR20 g-band)](models/astromer1-ztfdr20/README.md) | TensorFlow 2.14 | [light-curve/astromer1-ztfdr20](https://huggingface.co/light-curve/astromer1-ztfdr20) | implemented |
 | [Astromer 2](models/astromer2/README.md) | TensorFlow 2.14 | [light-curve/astromer2](https://huggingface.co/light-curve/astromer2) | implemented |
 | [ATAT](models/atat/README.md) | PyTorch | pending (no upstream license — see [alercebroker/ATAT#2](https://github.com/alercebroker/ATAT/issues/2)) | implemented |
 | [ATCAT](models/atcat/README.md) | PyTorch | [light-curve/atcat](https://huggingface.co/light-curve/atcat) | implemented |
@@ -67,6 +68,7 @@ Request only the output(s) you need — onnxruntime prunes unused computation.
 | Model | File(s) | Output names |
 |-------|---------|--------------|
 | Astromer 1 | `astromer1.onnx` | `mean`, `max`, `sequence` |
+| Astromer 1 (ZTF DR20 g-band) | `astromer1_ztfdr20.onnx` | `mean`, `max`, `sequence` |
 | Astromer 2 | `astromer2.onnx` | `mean`, `max`, `sequence` |
 | ATAT | `atat.onnx` | `token`, `mean`, `sequence` |
 | ATCAT | `atcat_bf16.onnx`, `atcat_f32.onnx` | `last`, `mean`, `sequence` |
