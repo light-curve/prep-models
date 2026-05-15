@@ -29,36 +29,14 @@ The repo uses a three-tier isolated structure:
 All commands are run via `uv run`. No manual environment activation is needed.
 
 ```bash
-# Astromer 2
 uv run prep-models astromer2 fetch         # pull latest upstream code
 uv run prep-models astromer2 download      # download pretrained weights
 uv run prep-models astromer2 export        # export ONNX files
 uv run prep-models astromer2 test-data --n-samples 5
-
-# Astromer 1 (same pattern)
-uv run prep-models astromer1 fetch
-uv run prep-models astromer1 download
-uv run prep-models astromer1 export
-uv run prep-models astromer1 test-data
-
-# ATAT (same pattern)
-uv run prep-models atat fetch
-uv run prep-models atat download      # also downloads one ELASTICC FITS pair for test data
-uv run prep-models atat export
-uv run prep-models atat test-data
-
-# ATCAT (same pattern)
-uv run prep-models atcat fetch
-uv run prep-models atcat download
-uv run prep-models atcat export
-uv run prep-models atcat test-data
 ```
 
-Or equivalently:
+All models follow the same pattern; replace `astromer2` with the model name of your choice.
 
-```bash
-uv run python -m prep_models astromer2 export
-```
 
 ## Export outputs
 
