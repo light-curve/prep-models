@@ -13,3 +13,6 @@
 [submodule "models/astrom3/code"]
 	path = models/astrom3/code
 	url = https://github.com/MeriDK/AstroM3
+[submodule "models/astromer1-ztfdr20/code"]
+	path = models/astromer1-ztfdr20/code
+	url = https://github.com/astromer-science/main-code

@@ -21,6 +21,11 @@ _MODELS: dict = {
         "module": "astromer1_prep",
         "hf_repo": f"{HF_ORG}/astromer1",
     },
+    "astromer1-ztfdr20": {
+        "project": REPO_ROOT / "models" / "astromer1-ztfdr20",
+        "module": "astromer1_ztfdr20_prep",
+        "hf_repo": f"{HF_ORG}/astromer1-ztfdr20",
+    },
     "astromer2": {
         "project": REPO_ROOT / "models" / "astromer2",
         "module": "astromer2_prep",
@@ -138,9 +143,14 @@ def _model_app(model_name: str) -> typer.Typer:
         _run(model_name, "fetch", extra)
 
     @sub.command("download")
-    def download() -> None:
+    def download(
+        force: bool = typer.Option(
+            False, "--force", help="Re-download even if data is already present."
+        ),
+    ) -> None:
         """Download pretrained weights."""
-        _run(model_name, "download", [])
+        extra = ["--force"] if force else []
+        _run(model_name, "download", extra)
 
     @sub.command("export")
     def export(
