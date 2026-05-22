@@ -51,6 +51,7 @@ Request only the output(s) you need — onnxruntime prunes unused computation.
 | Astromer 2 | `astromer2.onnx` | `mean`, `max`, `sequence` |
 | ATAT | `atat.onnx` | `token`, `mean`, `sequence` |
 | ATCAT | `atcat_bf16.onnx`, `atcat_f32.onnx` | `last`, `mean`, `sequence` |
+| AstraCLR | `astra_clr.onnx` | `output` |
 
 `sequence` is the per-element transformer output (`[batch, seq_len, embedding_dim]`); for ATAT the CLS token is excluded.
 `token` (ATAT only) is the CLS token — a dedicated global representation prepended to the sequence and excluded from `sequence`.
