@@ -47,6 +47,11 @@ _MODELS: dict = {
         "module": "astrom3_prep",
         "hf_repo": f"{HF_ORG}/astrom3",
     },
+    "astra-clr": {
+        "project": REPO_ROOT / "models" / "astra-clr",
+        "module": "astra_clr_prep",
+        "hf_repo": f"{HF_ORG}/astra-clr",
+    },
 }
 
 

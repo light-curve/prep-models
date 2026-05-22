@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "astra-clr-prep"
+version = "0.1.0"
+description = "AstraCLR ONNX prep sub-package"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "numpy>=1.26",
+    "onnxruntime>=1.17",
+    "pyarrow>=14",
+    "requests>=2.31",
+    "tqdm>=4.66",
+    "prep-models-utils",
+]
+
+[tool.uv.sources]
+prep-models-utils = { path = "../../utils", editable = true }
+
+[tool.setuptools.packages.find]
+include = ["astra_clr_prep*"]
