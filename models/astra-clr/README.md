@@ -2,24 +2,7 @@
 
 ## Paper
 
-StarCLR: Contrastive Learning Representation for Astronomical Light Curves
-
-Junyao Ding, Xiaodian Chen, Xinyi Gao, Xiaoyu Tang, Shu Wang, Yang Huang, Xinyu Qi,
-Guirong Xue, Ali Luo, Jifeng Liu (2025)
-
-```bibtex
-@article{Ding2025StarCLR,
-  title   = {StarCLR: Contrastive Learning Representation for Astronomical Light Curves},
-  author  = {Ding, Junyao and Chen, Xiaodian and Gao, Xinyi and Tang, Xiaoyu and
-             Wang, Shu and Huang, Yang and Qi, Xinyu and Xue, Guirong and
-             Luo, Ali and Liu, Jifeng},
-  journal = {arXiv},
-  year    = {2025},
-  eprint  = {2604.24516},
-  archivePrefix = {arXiv},
-  primaryClass  = {astro-ph.SR},
-}
-```
+Majumder et al., 2026, in prep.
 
 ## Original model
 
