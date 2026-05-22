@@ -57,4 +57,4 @@ g (0–299, 300 obs), r (300–649, 350 obs), i (650–699, 50 obs).
 ## Model file
 
 Source: https://huggingface.co/ashrot/astra-clr-base/blob/main/astra-clr.onnx
-Training data: ZTF Zubercal DR16
+Training data: ZTF Zubercal DR16 (https://huggingface.co/datasets/snad-space/astra-zubercaldr16_gaiadr3vclassre)
