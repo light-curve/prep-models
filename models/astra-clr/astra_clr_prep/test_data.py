@@ -15,8 +15,8 @@ from prep_models_utils.parquet import save_test_data
 
 from astra_clr_prep.config import (
     DATA_FILE,
-    MODEL_DIR,
-    OUTPUT_FILENAME,
+    HF_ONNX_FILENAME,
+    WEIGHTS_DIR,
 )
 
 # ── Preprocessing constants (from astra-infer) ───────────────────────────────
@@ -74,10 +74,10 @@ def _preprocess_lc(lc: dict) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.nda
 
 
 def _find_onnx() -> Path:
-    path = MODEL_DIR / "out" / "onnx" / OUTPUT_FILENAME
+    path = WEIGHTS_DIR / HF_ONNX_FILENAME
     if not path.exists():
         raise FileNotFoundError(
-            f"{path} not found. Run 'prep-models astra-clr export' first."
+            f"{path} not found. Run 'prep-models astra-clr download' first."
         )
     return path
 
@@ -120,7 +120,7 @@ def run_test_data(output_dir: Path, n_samples: int = 10) -> None:
         inp, times, binfo, mask = _preprocess_lc(lc)
 
         (embedding,) = sess.run(
-            ["mean"],
+            None,
             {"input": inp, "times": times, "band_info": binfo, "mask": mask},
         )
 
