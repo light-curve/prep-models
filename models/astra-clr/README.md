@@ -40,7 +40,7 @@ g (0–299, 300 obs), r (300–649, 350 obs), i (650–699, 50 obs).
 
 | Tensor | Shape | Description |
 |--------|-------|-------------|
-| output | `[batch, 512]` | Light-curve embedding |
+| mean | `[batch, 512]` | Light-curve embedding |
 
 ## Preprocessing steps
 

@@ -126,7 +126,7 @@ def run_test_data(output_dir: Path, n_samples: int = 10) -> None:
         inp, times, binfo, mask = _preprocess_lc(lc)
 
         (embedding,) = sess.run(
-            None,
+            ["mean"],
             {"input": inp, "times": times, "band_info": binfo, "mask": mask},
         )
 
