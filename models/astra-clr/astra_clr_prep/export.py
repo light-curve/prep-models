@@ -6,7 +6,7 @@ import onnx
 
 from astra_clr_prep.config import HF_ONNX_FILENAME, OUTPUT_FILENAME, WEIGHTS_DIR
 
-_OLD_NAME = "output"
+_OLD_NAME = "output_0"
 _NEW_NAME = "mean"
 
 

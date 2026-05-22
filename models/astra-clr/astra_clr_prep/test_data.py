@@ -9,9 +9,8 @@ from pathlib import Path
 
 import numpy as np
 import onnxruntime as rt
+import pyarrow as pa
 import pyarrow.parquet as pq
-
-from prep_models_utils.parquet import save_test_data
 
 from astra_clr_prep.config import (
     DATA_FILE,
@@ -121,13 +120,33 @@ def run_test_data(output_dir: Path, n_samples: int = 10) -> None:
         rows.append(
             {
                 "lightcurve": [
-                    {"mjd": float(t), "mag": float(m), "magerr": float(e)}
-                    for t, m, e in zip(mjd, mag, magerr)
+                    {
+                        "mjd": float(t),
+                        "mag": float(m),
+                        "magerr": float(e),
+                        "band": str(b),
+                    }
+                    for t, m, e, b in zip(mjd, mag, magerr, band)
                 ],
                 "embedding_mean": embedding[0].tolist(),
             }
         )
 
+    obs_type = pa.struct(
+        [
+            pa.field("mjd", pa.float64()),
+            pa.field("mag", pa.float32()),
+            pa.field("magerr", pa.float32()),
+            pa.field("band", pa.string()),
+        ]
+    )
+    embedding_dim = len(rows[0]["embedding_mean"])
+    schema = pa.schema(
+        [
+            pa.field("lightcurve", pa.list_(obs_type)),
+            pa.field("embedding_mean", pa.list_(pa.float32(), embedding_dim)),
+        ]
+    )
     path = output_dir / "astra_clr_test.parquet"
-    save_test_data(rows, path)
+    pq.write_table(pa.Table.from_pylist(rows, schema=schema), path)
     print(f"Saved {len(rows)} test samples to {path}")
