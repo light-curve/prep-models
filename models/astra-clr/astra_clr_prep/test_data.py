@@ -121,8 +121,13 @@ def run_test_data(output_dir: Path, n_samples: int = 10) -> None:
         rows.append(
             {
                 "lightcurve": [
-                    {"mjd": float(t), "mag": float(m), "magerr": float(e)}
-                    for t, m, e in zip(mjd, mag, magerr)
+                    {
+                        "mjd": float(t),
+                        "mag": float(m),
+                        "magerr": float(e),
+                        "band": str(b),
+                    }
+                    for t, m, e, b in zip(mjd, mag, magerr, band)
                 ],
                 "embedding_mean": embedding[0].tolist(),
             }
