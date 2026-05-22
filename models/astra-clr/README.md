@@ -6,6 +6,8 @@ Majumder et al., 2026, in prep.
 
 ## Original model
 
+GitHub: https://github.com/TorshaMajumder/astra (private)
+
 HuggingFace: https://huggingface.co/ashrot/astra-clr-base
 
 Inference library: https://github.com/snad-space/astra-infer
