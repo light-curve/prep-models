@@ -9,6 +9,5 @@ HF_ONNX_FILENAME = "astra-clr.onnx"
 OUTPUT_FILENAME = "astra_clr.onnx"
 
 HF_DATA_REPO = "snad-space/astra-zubercaldr16_gaiadr3vclassre"
-# URL path uses %3D-encoded '=' signs required by the HF dataset server
-HF_DATA_URL_PATH = "hats/dataset/Norder%3D0/Dir%3D0/Npix%3D8.parquet"
+HF_DATA_FILENAME = "hats/dataset/Norder=0/Dir=0/Npix=8.parquet"
 DATA_FILE = DATA_DIR / "Npix=8.parquet"

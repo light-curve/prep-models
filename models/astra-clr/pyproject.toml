@@ -6,13 +6,12 @@ build-backend = "setuptools.build_meta"
 name = "astra-clr-prep"
 version = "0.1.0"
 description = "AstraCLR ONNX prep sub-package"
-requires-python = ">=3.12,<3.13"
+requires-python = ">=3.14"
 dependencies = [
+    "huggingface_hub>=0.23",
     "numpy>=1.26",
     "onnxruntime>=1.17",
     "pyarrow>=14",
-    "requests>=2.31",
-    "tqdm>=4.66",
     "prep-models-utils",
 ]
 
