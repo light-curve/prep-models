@@ -6,13 +6,22 @@ from pathlib import Path
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-_OBSERVATION_TYPE = pa.struct(
-    [
-        pa.field("mjd", pa.float64()),
-        pa.field("mag", pa.float32()),
-        pa.field("magerr", pa.float32()),
-    ]
-)
+_OBSERVATION_REQUIRED = [
+    pa.field("mjd", pa.float64()),
+    pa.field("mag", pa.float32()),
+    pa.field("magerr", pa.float32()),
+]
+_OBSERVATION_OPTIONAL = [
+    ("band", pa.string()),
+]
+
+
+def _observation_type(sample: dict) -> pa.StructType:
+    fields = list(_OBSERVATION_REQUIRED)
+    for name, dtype in _OBSERVATION_OPTIONAL:
+        if name in sample:
+            fields.append(pa.field(name, dtype))
+    return pa.struct(fields)
 
 
 def _build_test_data_table(
@@ -29,10 +38,11 @@ def _build_test_data_table(
         if name in rows[0]:
             optional_fields.append(pa.field(name, dtype))
 
+    obs_type = _observation_type(rows[0]["lightcurve"][0])
     schema = pa.schema(
         [
             *optional_fields,
-            pa.field("lightcurve", pa.list_(_OBSERVATION_TYPE)),
+            pa.field("lightcurve", pa.list_(obs_type)),
             pa.field(embedding_name, pa.list_(pa.float32(), embedding_dim)),
         ]
     )
