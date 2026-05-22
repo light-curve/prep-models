@@ -33,8 +33,6 @@ LG_EFF_WAVE = {
     "i": np.log10(7829.03),
 }
 
-FILTERID_TO_BAND = {1: "g", 2: "r", 3: "i"}
-
 
 def _preprocess_lc(lc: dict) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Return (input, times, band_info, mask) tensors of shape (1, SEQ_LEN[, 1])."""
@@ -93,23 +91,19 @@ def run_test_data(output_dir: Path, n_samples: int = 10) -> None:
 
     sess = rt.InferenceSession(str(_find_onnx()))
 
-    table = pq.read_table(DATA_FILE, columns=["hmjd", "mag", "magerr", "filterid"])
+    table = pq.read_table(DATA_FILE, columns=["lc"])
     rows = []
 
     for i in range(len(table)):
         if len(rows) >= n_samples:
             break
 
-        hmjd = table["hmjd"][i].as_py()
-        mag_raw = table["mag"][i].as_py()
-        magerr_raw = table["magerr"][i].as_py()
-        filterid = table["filterid"][i].as_py()
-
-        mjd = np.asarray(hmjd, dtype=np.float64)
-        mag = np.asarray(mag_raw, dtype=np.float32)
-        # magerr stored as integers in units of 1e-4 mag
-        magerr = np.asarray(magerr_raw, dtype=np.float32) * 1e-4
-        band = np.array([FILTERID_TO_BAND.get(f, "g") for f in filterid])
+        lc_row = table["lc"][i].as_py()
+        mjd = np.asarray(lc_row["mjd"], dtype=np.float64)
+        mag = np.asarray(lc_row["mag"], dtype=np.float32)
+        # magerr stored as uint16 in units of 1e-4 mag
+        magerr = np.asarray(lc_row["magerr"], dtype=np.float32) * 1e-4
+        band = np.asarray(lc_row["band"])
 
         valid = np.isfinite(mjd) & np.isfinite(mag) & np.isfinite(magerr) & (magerr > 0)
         mjd, mag, magerr, band = mjd[valid], mag[valid], magerr[valid], band[valid]
