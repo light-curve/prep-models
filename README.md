@@ -15,6 +15,7 @@ Each HuggingFace repository carries the original model's license and a README wi
 | [ATAT](models/atat/README.md) | PyTorch | pending (no upstream license — see [alercebroker/ATAT#2](https://github.com/alercebroker/ATAT/issues/2)) | implemented |
 | [ATCAT](models/atcat/README.md) | PyTorch | [light-curve/atcat](https://huggingface.co/light-curve/atcat) | implemented |
 | [AstroM3](models/astrom3/README.md) | PyTorch | [light-curve/astrom3](https://huggingface.co/light-curve/astrom3) | implemented |
+| [AstraCLR](models/astra-clr/README.md) | ONNX (pre-built) | [light-curve/astra-clr](https://huggingface.co/light-curve/astra-clr) | implemented |
 
 ## Architecture
 
@@ -50,6 +51,7 @@ Request only the output(s) you need — onnxruntime prunes unused computation.
 | Astromer 2 | `astromer2.onnx` | `mean`, `max`, `sequence` |
 | ATAT | `atat.onnx` | `token`, `mean`, `sequence` |
 | ATCAT | `atcat_bf16.onnx`, `atcat_f32.onnx` | `last`, `mean`, `sequence` |
+| AstraCLR | `astra_clr.onnx` | `mean` |
 
 `sequence` is the per-element transformer output (`[batch, seq_len, embedding_dim]`); for ATAT the CLS token is excluded.
 `token` (ATAT only) is the CLS token — a dedicated global representation prepended to the sequence and excluded from `sequence`.
