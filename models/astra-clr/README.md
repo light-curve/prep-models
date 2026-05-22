@@ -30,7 +30,7 @@ channel.  The ONNX file is distributed pre-built and requires no ML-framework co
 |--------|-------|-------|-------------|
 | `input` | `[batch, 700, 1]` | float32 | Inverse-variance-weighted mean-subtracted magnitude per band window |
 | `times` | `[batch, 700, 1]` | float32 | Observation time minus MJD offset (58 000) |
-| `band_info` | `[batch, 700, 1]` | float32 | log₁₀(effective wavelength in Å) for the observation's band |
+| `band_info` | `[batch, 700, 1]` | float32 | lg(effective wavelength in Å) for the observation's band |
 | `mask` | `[batch, 700]` | float32 | 0 = real observation, 1 = padded |
 
 The 700-element sequence is a concatenation of three per-band windows:
@@ -49,8 +49,8 @@ g (0–299, 300 obs), r (300–649, 350 obs), i (650–699, 50 obs).
 3. **Magnitude normalisation** per band: subtract the inverse-variance-weighted mean.
    `norm_mag = mag − Σ(mag/magerr²) / Σ(1/magerr²)`
 4. **Time normalisation**: `norm_time = mjd − 58 000`
-5. **Band channel**: `band_info = log₁₀(eff_wavelength_Å)`
-   — g: log₁₀(4746.48), r: log₁₀(6366.38), i: log₁₀(7829.03)
+5. **Band channel**: `band_info = lg(eff_wavelength_Å)`
+   — g: lg(4746.48), r: lg(6366.38), i: lg(7829.03)
 6. **Padding**: zero-pad shorter windows to the required length; set `mask = 1` for
    padded positions, `mask = 0` for real observations.
 
