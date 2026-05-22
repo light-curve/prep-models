@@ -15,6 +15,7 @@ Each HuggingFace repository carries the original model's license and a README wi
 | [ATAT](models/atat/README.md) | PyTorch | pending (no upstream license — see [alercebroker/ATAT#2](https://github.com/alercebroker/ATAT/issues/2)) | implemented |
 | [ATCAT](models/atcat/README.md) | PyTorch | [light-curve/atcat](https://huggingface.co/light-curve/atcat) | implemented |
 | [AstroM3](models/astrom3/README.md) | PyTorch | [light-curve/astrom3](https://huggingface.co/light-curve/astrom3) | implemented |
+| [AstraCLR](models/astra-clr/README.md) | ONNX (pre-built) | [light-curve/astra-clr](https://huggingface.co/light-curve/astra-clr) | implemented |
 
 ## Architecture
 
