@@ -17,8 +17,6 @@ from astra_clr_prep.config import (
     DATA_FILE,
     MODEL_DIR,
     OUTPUT_FILENAME,
-    WEIGHTS_DIR,
-    HF_ONNX_FILENAME,
 )
 
 # ── Preprocessing constants (from astra-infer) ───────────────────────────────
@@ -76,16 +74,12 @@ def _preprocess_lc(lc: dict) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.nda
 
 
 def _find_onnx() -> Path:
-    candidates = [
-        MODEL_DIR / "out" / "onnx" / OUTPUT_FILENAME,
-        WEIGHTS_DIR / HF_ONNX_FILENAME,
-    ]
-    for p in candidates:
-        if p.exists():
-            return p
-    raise FileNotFoundError(
-        "ONNX not found. Run 'prep-models astra-clr download' and 'export' first."
-    )
+    path = MODEL_DIR / "out" / "onnx" / OUTPUT_FILENAME
+    if not path.exists():
+        raise FileNotFoundError(
+            f"{path} not found. Run 'prep-models astra-clr export' first."
+        )
+    return path
 
 
 def run_test_data(output_dir: Path, n_samples: int = 10) -> None:
