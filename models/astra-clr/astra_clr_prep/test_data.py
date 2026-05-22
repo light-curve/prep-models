@@ -1,6 +1,7 @@
-"""Generate test data: synthetic ZTF-like light curves with AstraCLR embeddings.
+"""Generate test data: real ZTF light curves with AstraCLR embeddings.
 
-Preprocessing constants and tensor layout follow the astra-infer reference
+Reads objects from the snad-space/astra-zubercaldr16_gaiadr3vclassre dataset
+(Zubercal DR16 × Gaia DR3). Preprocessing follows the astra-infer reference
 implementation (https://github.com/snad-space/astra-infer).
 """
 
@@ -8,10 +9,12 @@ from pathlib import Path
 
 import numpy as np
 import onnxruntime as rt
+import pyarrow.parquet as pq
 
 from prep_models_utils.parquet import save_test_data
 
 from astra_clr_prep.config import (
+    DATA_FILE,
     MODEL_DIR,
     OUTPUT_FILENAME,
     WEIGHTS_DIR,
@@ -31,6 +34,8 @@ LG_EFF_WAVE = {
     "r": np.log10(6366.38),
     "i": np.log10(7829.03),
 }
+
+FILTERID_TO_BAND = {1: "g", 2: "r", 3: "i"}
 
 
 def _preprocess_lc(lc: dict) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
@@ -87,18 +92,35 @@ def run_test_data(output_dir: Path, n_samples: int = 10) -> None:
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    if not DATA_FILE.exists():
+        raise FileNotFoundError(
+            f"{DATA_FILE} not found. Run 'prep-models astra-clr download' first."
+        )
+
     sess = rt.InferenceSession(str(_find_onnx()))
 
-    rng = np.random.default_rng(42)
+    table = pq.read_table(DATA_FILE, columns=["hmjd", "mag", "magerr", "filterid"])
     rows = []
 
-    for _ in range(n_samples):
-        n_obs = int(rng.integers(200, 500))
-        mjd = np.sort(rng.uniform(58000.0, 60500.0, n_obs))
-        band = rng.choice(BANDS, n_obs, p=[0.40, 0.50, 0.10])
-        mag_base = float(rng.uniform(17.0, 21.0))
-        mag = (mag_base + rng.normal(0.0, 0.1, n_obs)).astype(np.float32)
-        magerr = rng.uniform(0.01, 0.15, n_obs).astype(np.float32)
+    for i in range(len(table)):
+        if len(rows) >= n_samples:
+            break
+
+        hmjd = table["hmjd"][i].as_py()
+        mag_raw = table["mag"][i].as_py()
+        magerr_raw = table["magerr"][i].as_py()
+        filterid = table["filterid"][i].as_py()
+
+        mjd = np.asarray(hmjd, dtype=np.float64)
+        mag = np.asarray(mag_raw, dtype=np.float32)
+        # magerr stored as integers in units of 1e-4 mag
+        magerr = np.asarray(magerr_raw, dtype=np.float32) * 1e-4
+        band = np.array([FILTERID_TO_BAND.get(f, "g") for f in filterid])
+
+        valid = np.isfinite(mjd) & np.isfinite(mag) & np.isfinite(magerr) & (magerr > 0)
+        mjd, mag, magerr, band = mjd[valid], mag[valid], magerr[valid], band[valid]
+        if len(mjd) == 0:
+            continue
 
         lc = {"mjd": mjd, "mag": mag, "magerr": magerr, "band": band}
         inp, times, binfo, mask = _preprocess_lc(lc)
@@ -120,4 +142,4 @@ def run_test_data(output_dir: Path, n_samples: int = 10) -> None:
 
     path = output_dir / "astra_clr_test.parquet"
     save_test_data(rows, path)
-    print(f"Saved {n_samples} test samples to {path}")
+    print(f"Saved {len(rows)} test samples to {path}")
