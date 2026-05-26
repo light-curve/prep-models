@@ -7,15 +7,15 @@ Each HuggingFace repository carries the original model's license and a README wi
 
 ## Models
 
-| Model | Framework | HuggingFace | Status |
-|-------|-----------|-------------|--------|
-| [Astromer 1](models/astromer1/README.md) | TensorFlow 2.14 | [light-curve/astromer1](https://huggingface.co/light-curve/astromer1) | implemented |
-| [Astromer 1 (ZTF DR20 g-band)](models/astromer1-ztfdr20/README.md) | TensorFlow 2.14 | [light-curve/astromer1-ztfdr20](https://huggingface.co/light-curve/astromer1-ztfdr20) | implemented |
-| [Astromer 2](models/astromer2/README.md) | TensorFlow 2.14 | [light-curve/astromer2](https://huggingface.co/light-curve/astromer2) | implemented |
-| [ATAT](models/atat/README.md) | PyTorch | pending (no upstream license — see [alercebroker/ATAT#2](https://github.com/alercebroker/ATAT/issues/2)) | implemented |
-| [ATCAT](models/atcat/README.md) | PyTorch | [light-curve/atcat](https://huggingface.co/light-curve/atcat) | implemented |
-| [AstroM3](models/astrom3/README.md) | PyTorch | [light-curve/astrom3](https://huggingface.co/light-curve/astrom3) | implemented |
-| [AstraCLR](models/astra-clr/README.md) | ONNX (pre-built) | [light-curve/astra-clr](https://huggingface.co/light-curve/astra-clr) | implemented |
+| Model | Framework | License | HuggingFace | Status |
+|-------|-----------|---------|-------------|--------|
+| [Astromer 1](models/astromer1/README.md) | TensorFlow 2.14 | MIT | [light-curve/astromer1](https://huggingface.co/light-curve/astromer1) | implemented |
+| [Astromer 1 (ZTF DR20 g-band)](models/astromer1-ztfdr20/README.md) | TensorFlow 2.14 | GPL-3.0 | [light-curve/astromer1-ztfdr20](https://huggingface.co/light-curve/astromer1-ztfdr20) | implemented |
+| [Astromer 2](models/astromer2/README.md) | TensorFlow 2.14 | MIT | [light-curve/astromer2](https://huggingface.co/light-curve/astromer2) | implemented |
+| [ATAT](models/atat/README.md) | PyTorch | none (see [alercebroker/ATAT#2](https://github.com/alercebroker/ATAT/issues/2)) | pending | implemented |
+| [ATCAT](models/atcat/README.md) | PyTorch | MIT (non-military use restriction) | [light-curve/atcat](https://huggingface.co/light-curve/atcat) | implemented |
+| [AstroM3](models/astrom3/README.md) | PyTorch | MIT (code), CC BY 4.0 (weights) | [light-curve/astrom3](https://huggingface.co/light-curve/astrom3) | implemented |
+| [AstraCLR](models/astra-clr/README.md) | ONNX (pre-built) | MIT | [light-curve/astra-clr](https://huggingface.co/light-curve/astra-clr) | implemented |
 
 ## Architecture
 
@@ -64,3 +64,8 @@ Request only the output(s) you need — onnxruntime prunes unused computation.
 uv sync          # install root CLI deps
 uv run prep-models --help
 ```
+
+## License
+
+The root-level [LICENSE](LICENSE) covers only the code in this repository.
+It does **not** apply to the git submodules under `models/*/code/` — each submodule retains its own upstream license (see the License column in the Models table above).
