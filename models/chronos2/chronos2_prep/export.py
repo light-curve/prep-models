@@ -34,11 +34,14 @@ import torch.nn as nn
 
 from chronos import Chronos2Pipeline
 
-from chronos2_prep.config import HF_REPO, OUTPUT_PREFIX
+from chronos2_prep.config import HF_REPO, HF_REVISION, OUTPUT_PREFIX
 
 
 def _load_pipeline() -> Chronos2Pipeline:
-    return Chronos2Pipeline.from_pretrained(HF_REPO, device_map="cpu")
+    # Pin the HF revision so the loaded weights are 100% reproducible.
+    return Chronos2Pipeline.from_pretrained(
+        HF_REPO, revision=HF_REVISION, device_map="cpu"
+    )
 
 
 class _Chronos2Embedder(nn.Module):

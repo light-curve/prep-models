@@ -17,7 +17,12 @@ Ansari et al., 2025. "Chronos-2: Learning the Language of Time Series." Amazon W
 
 HuggingFace: https://huggingface.co/amazon/chronos-2
 
-Package: `chronos-forecasting>=2.0` (pip-installable, no code submodule)
+Package: `chronos-forecasting==2.3.0` (pip-installable, no code submodule)
+
+Weights are pinned to commit
+[`29ec3766`](https://huggingface.co/amazon/chronos-2/commit/29ec3766d36d6f73f0696f85560a422f50e8498c)
+of the HF repo, so the export is fully reproducible regardless of upstream
+changes to `main`.
 
 ## License
 
@@ -78,4 +83,5 @@ by the model.
 ## Weights
 
 Source: https://huggingface.co/amazon/chronos-2 (loaded automatically via
-`Chronos2Pipeline.from_pretrained`)
+`Chronos2Pipeline.from_pretrained`, pinned to revision
+`29ec3766d36d6f73f0696f85560a422f50e8498c`)

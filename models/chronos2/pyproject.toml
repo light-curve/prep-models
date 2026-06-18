@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Chronos 2 ONNX prep sub-package"
 requires-python = ">=3.12"
 dependencies = [
-    "chronos-forecasting>=2.0",
+    "chronos-forecasting==2.3.0",
     "numpy>=1.26",
     "onnx>=1.16",
     "onnxruntime>=1.17",
