@@ -51,25 +51,26 @@ has no dedicated wavelength embedding layer.
 
 | Tensor | Shape | dtype | Description |
 |--------|-------|-------|-------------|
-| `context` | `[batch, 512]` | float32 | Magnitude values; NaN marks left-padded positions |
+| `context` | `[batch, seq]` | float32 | Magnitude values; NaN marks left-padded positions |
 
-The ONNX model has a fixed context length of 512 observations (32 patches × 16).
-Longer series are truncated to the last 512 observations; shorter series are left-padded
-with NaN.
+Both `batch` and `seq` are **dynamic** axes. `seq` must be a multiple of the patch
+size (16) and may be anything up to the model's native context of 8192 (512 patches).
+Inference cost scales with `seq`, so shorter series are proportionally cheaper — there is
+no fixed window and no truncation. Pad each batch to a common multiple of 16 with NaN.
 
 ## Outputs (ONNX)
 
 | Name | Shape | Description |
 |------|-------|-------------|
 | `mean` | `[batch, 768]` | Masked mean pool over valid context patches |
-| `sequence` | `[batch, 32, 768]` | Per-patch encoder hidden states |
+| `sequence` | `[batch, seq/16, 768]` | Per-patch encoder hidden states |
 
 ## Preprocessing steps
 
 1. Select observations (time-sorted magnitudes).
-2. If more than 512 observations, keep the last 512.
-3. Left-pad to length 512 with NaN.
-4. Pass the `[batch, 512]` float32 tensor to the ONNX model.
+2. Optionally cap to the last 8192 observations (the model's native context).
+3. Left-pad each series to a common length that is a multiple of 16, using NaN.
+4. Pass the `[batch, seq]` float32 tensor to the ONNX model.
 
 Instance normalisation (mean subtraction, std scaling, arcsinh) is applied internally
 by the model.

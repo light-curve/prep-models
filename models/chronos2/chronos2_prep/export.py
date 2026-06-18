@@ -10,8 +10,10 @@ normalization).
 
 Input
 -----
-context : float32 [batch, CONTEXT_LENGTH]
+context : float32 [batch, seq]
     Magnitude values.  NaN marks left-padded / missing observations.
+    Both axes are dynamic; ``seq`` must be a multiple of the patch size (16),
+    up to the model's native context of 8192.
 
 Outputs
 -------
@@ -62,18 +64,6 @@ class _Chronos2Embedder(nn.Module):
         self.input_patch_embedding = model.input_patch_embedding
         self.encoder = model.encoder
 
-        # Pre-computed constants (registered as buffers → constant in ONNX)
-        N = context_length
-        P = self.patch_size
-        # Context time encoding: [-N, -(N-1), ..., -1] / time_encoding_scale
-        # Shape: (num_patches, patch_size) → unsqueeze(0) in forward for broadcast
-        time_enc = (
-            torch.arange(-N, 0, dtype=torch.float32)
-            .view(self.num_patches, P)
-            .div(self.time_encoding_scale)
-        )
-        self.register_buffer("time_enc", time_enc)  # (num_patches, patch_size)
-
         # Pre-computed [REG] token embedding; shape (1, 1, d_model)
         reg_id = model.config.reg_token_id
         with torch.no_grad():
@@ -112,23 +102,26 @@ class _Chronos2Embedder(nn.Module):
         return normed, valid
 
     def forward(self, context: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
-        # context: (batch, context_length), float32, NaN = left-padded / missing
+        # context: (batch, seq), float32, NaN = left-padded / missing.
+        # seq must be a multiple of patch_size; it is a dynamic ONNX axis.
         batch = context.shape[0]
+        P = self.patch_size
 
         # --- 1. Instance normalisation ---
-        normed, valid = self._instance_norm(context)  # (batch, N)
+        normed, valid = self._instance_norm(context)  # (batch, seq)
 
-        # --- 2. Patching: reshape to (batch, num_patches, patch_size) ---
-        normed = normed.to(
-            torch.float16
-        )  # match model dtype (bfloat16 on GPU, float16 trace)
-        # Note: model was loaded in float32 (device_map=cpu); cast is safe
-        normed = normed.to(torch.float32)
-        patches = normed.view(batch, self.num_patches, self.patch_size)  # (B, K, P)
-        mask_patches = valid.float().view(batch, self.num_patches, self.patch_size)
+        # --- 2. Context time encoding: [-seq, ..., -1] / scale ---
+        # Built from cumsum-of-ones so the length stays a *dynamic* ONNX axis
+        # (torch.arange(-seq, 0) would fold the traced int and pin the length).
+        ones = torch.ones_like(context)  # (batch, seq)
+        positions = ones.cumsum(dim=1)  # 1, 2, ..., seq  (dynamic)
+        length = positions[:, -1:]  # = seq, as a tensor
+        time_flat = (positions - length - 1.0) / self.time_encoding_scale  # (B, seq)
 
-        # --- 3. Context time encoding: broadcast buffer over batch ---
-        time_enc = self.time_enc.unsqueeze(0).expand(batch, -1, -1)  # (B, K, P)
+        # --- 3. Patching: reshape to (batch, num_patches, patch_size) ---
+        patches = normed.view(batch, -1, P)  # (B, K, P), K dynamic
+        mask_patches = valid.float().view(batch, -1, P)
+        time_enc = time_flat.view(batch, -1, P)  # (B, K, P)
 
         # Zero out patches that are entirely masked (all observations are NaN)
         patch_valid = mask_patches.sum(dim=-1) > 0  # (B, K)
@@ -171,7 +164,7 @@ class _Chronos2Embedder(nn.Module):
         hidden = encoder_out[0]  # (B, K+2, d_model)
 
         # --- 10. Pool over context patches only (drop [REG] and future-patch tokens) ---
-        sequence = hidden[:, : self.num_patches, :]  # (B, K, d_model)
+        sequence = hidden[:, :-2, :]  # (B, K, d_model); last 2 are [REG] + future
         patch_valid_f = patch_valid.float().unsqueeze(-1)  # (B, K, 1)
         mean = (sequence * patch_valid_f).sum(dim=1) / patch_valid_f.sum(dim=1).clamp(
             min=1.0
@@ -200,14 +193,18 @@ def run_export(output_dir: Path) -> None:
 
     input_names = ["context"]
     output_names = ["mean", "sequence"]
+    # Both batch and sequence length are dynamic. seq must be a multiple of
+    # patch_size (16); shorter series cost proportionally less at inference.
     dynamic_axes = {
-        "context": {0: "batch"},
+        "context": {0: "batch", 1: "seq"},
         "mean": {0: "batch"},
-        "sequence": {0: "batch"},
+        "sequence": {0: "batch", 1: "num_patches"},
     }
 
     out_path = output_dir / f"{OUTPUT_PREFIX}.onnx"
-    print(f"Exporting {out_path.name}  (context_length={CONTEXT_LENGTH}) ...")
+    print(
+        f"Exporting {out_path.name}  (dynamic seq; trace length={CONTEXT_LENGTH}) ..."
+    )
 
     with torch.no_grad():
         torch.onnx.export(
