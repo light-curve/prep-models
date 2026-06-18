@@ -88,7 +88,7 @@ def run_test_data(output_dir: Path, n_samples: int = 10) -> None:
         mean_emb, _sequence = embedder(context)
     embeddings = mean_emb.numpy()  # (n_samples, d_model)
 
-    out_path = output_dir / "chronos2_test_data.parquet"
+    out_path = output_dir / "chronos2_test.parquet"
     _save(curves, embeddings, out_path)
     print(f"Saved {n_samples} samples → {out_path}")
 
