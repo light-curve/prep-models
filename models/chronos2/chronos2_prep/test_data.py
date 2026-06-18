@@ -58,25 +58,45 @@ def _synthetic_curve(n_obs: int) -> dict:
     }
 
 
-def _to_context_tensor(curves: list[dict]) -> torch.Tensor:
-    """Left-pad magnitude arrays to CONTEXT_LENGTH, NaN for padding."""
-    batch = torch.full((len(curves), CONTEXT_LENGTH), float("nan"), dtype=torch.float32)
-    for i, curve in enumerate(curves):
-        mag = torch.tensor(curve["mag"], dtype=torch.float32)
-        n = min(len(mag), CONTEXT_LENGTH)
-        batch[i, CONTEXT_LENGTH - n :] = mag[-n:]
-    return batch
+# Bounds on the number of observations per curve.  The model's native context
+# is 8192; the minimum keeps curves long enough to be meaningful.
+_MIN_OBS = 50
+_MAX_OBS = 8192
+_PATCH_SIZE = 16
+
+
+def _log_uniform_n_obs() -> int:
+    """Draw a log-uniform observation count in [_MIN_OBS, _MAX_OBS].
+
+    Log-uniform spreads samples across orders of magnitude and yields arbitrary
+    (odd, non-round) lengths, exercising the dynamic ONNX sequence axis.
+    """
+    log_n = _RNG.uniform(np.log(_MIN_OBS), np.log(_MAX_OBS))
+    return int(round(float(np.exp(log_n))))
+
+
+def _context_for_curve(curve: dict) -> torch.Tensor:
+    """Left-pad one curve's magnitudes to the next multiple of the patch size.
+
+    Returns a (1, seq) tensor with NaN padding, where seq % _PATCH_SIZE == 0.
+    Each curve is embedded at its own length to use the dynamic sequence axis.
+    """
+    mag = torch.tensor(curve["mag"][-_MAX_OBS:], dtype=torch.float32)
+    n = mag.shape[0]
+    seq = ((n + _PATCH_SIZE - 1) // _PATCH_SIZE) * _PATCH_SIZE
+    out = torch.full((1, seq), float("nan"), dtype=torch.float32)
+    out[0, seq - n :] = mag
+    return out
 
 
 def run_test_data(output_dir: Path, n_samples: int = 10) -> None:
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    n_obs_range = (50, min(CONTEXT_LENGTH, 300))
     print(f"Generating {n_samples} synthetic periodic light curves ...")
-    curves = [_synthetic_curve(_RNG.integers(*n_obs_range)) for _ in range(n_samples)]
-
-    context = _to_context_tensor(curves)
+    curves = [_synthetic_curve(_log_uniform_n_obs()) for _ in range(n_samples)]
+    sizes = sorted(len(c["mag"]) for c in curves)
+    print(f"  observation counts (log-uniform 50–8192): {sizes}")
 
     print("Loading Chronos 2 and computing embeddings ...")
     pipeline = _load_pipeline()
@@ -84,9 +104,12 @@ def run_test_data(output_dir: Path, n_samples: int = 10) -> None:
     embedder = _Chronos2Embedder(pipeline, CONTEXT_LENGTH)
     embedder.eval()
 
+    # Embed each curve individually at its own (variable) sequence length.
+    embeddings = np.empty((len(curves), pipeline.model.model_dim), dtype=np.float32)
     with torch.no_grad():
-        mean_emb, _sequence = embedder(context)
-    embeddings = mean_emb.numpy()  # (n_samples, d_model)
+        for i, curve in enumerate(curves):
+            mean_emb, _sequence = embedder(_context_for_curve(curve))
+            embeddings[i] = mean_emb.numpy()[0]
 
     out_path = output_dir / "chronos2_test.parquet"
     _save(curves, embeddings, out_path)
