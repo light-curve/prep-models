@@ -18,7 +18,6 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import torch
 
-from chronos2_prep.config import CONTEXT_LENGTH
 from chronos2_prep.export import _Chronos2Embedder, _load_pipeline
 
 _RNG = np.random.default_rng(42)
@@ -101,7 +100,7 @@ def run_test_data(output_dir: Path, n_samples: int = 10) -> None:
     print("Loading Chronos 2 and computing embeddings ...")
     pipeline = _load_pipeline()
     pipeline.model.eval()
-    embedder = _Chronos2Embedder(pipeline, CONTEXT_LENGTH)
+    embedder = _Chronos2Embedder(pipeline)
     embedder.eval()
 
     # Embed each curve individually at its own (variable) sequence length.

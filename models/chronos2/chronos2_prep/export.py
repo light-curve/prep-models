@@ -34,7 +34,7 @@ import torch.nn as nn
 
 from chronos import Chronos2Pipeline
 
-from chronos2_prep.config import CONTEXT_LENGTH, HF_REPO, OUTPUT_PREFIX
+from chronos2_prep.config import HF_REPO, OUTPUT_PREFIX
 
 
 def _load_pipeline() -> Chronos2Pipeline:
@@ -49,11 +49,10 @@ class _Chronos2Embedder(nn.Module):
     All intermediate tensors have shapes that ORT can fully infer statically.
     """
 
-    def __init__(self, pipeline: Chronos2Pipeline, context_length: int) -> None:
+    def __init__(self, pipeline: Chronos2Pipeline) -> None:
         super().__init__()
         model = pipeline.model
         self.patch_size: int = model.chronos_config.input_patch_size
-        self.num_patches: int = context_length // self.patch_size
         self.time_encoding_scale: float = float(
             model.chronos_config.time_encoding_scale
         )
@@ -79,7 +78,7 @@ class _Chronos2Embedder(nn.Module):
 
     def _instance_norm(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """Masked mean/std normalisation + optional arcsinh, ONNX-compatible."""
-        # x: (batch, context_length), NaN = padding
+        # x: (batch, seq), NaN = padding
         valid = ~torch.isnan(x)
         zeros = torch.zeros_like(x)
         x_safe = torch.where(valid, x, zeros)  # NaN → 0 (NaN * 0.0 ≠ 0 in IEEE 754)
@@ -181,15 +180,17 @@ def run_export(output_dir: Path) -> None:
     pipeline = _load_pipeline()
     pipeline.model.eval()
 
-    embedder = _Chronos2Embedder(pipeline, CONTEXT_LENGTH)
+    embedder = _Chronos2Embedder(pipeline)
     embedder.eval()
 
     d_model: int = pipeline.model.model_dim
-    num_patches = CONTEXT_LENGTH // pipeline.model.chronos_config.input_patch_size
 
-    dummy_context = torch.zeros(2, CONTEXT_LENGTH, dtype=torch.float32)
+    # The sequence axis is dynamic; this length is only the concrete example
+    # used to trace the export (any multiple of patch_size 16 works).
+    trace_len = 32 * pipeline.model.chronos_config.input_patch_size  # 512
+    dummy_context = torch.zeros(2, trace_len, dtype=torch.float32)
     # Left-pad first sample with NaN to exercise the masking path
-    dummy_context[0, : CONTEXT_LENGTH // 2] = float("nan")
+    dummy_context[0, : trace_len // 2] = float("nan")
 
     input_names = ["context"]
     output_names = ["mean", "sequence"]
@@ -202,9 +203,7 @@ def run_export(output_dir: Path) -> None:
     }
 
     out_path = output_dir / f"{OUTPUT_PREFIX}.onnx"
-    print(
-        f"Exporting {out_path.name}  (dynamic seq; trace length={CONTEXT_LENGTH}) ..."
-    )
+    print(f"Exporting {out_path.name}  (dynamic seq; trace length={trace_len}) ...")
 
     with torch.no_grad():
         torch.onnx.export(
@@ -222,5 +221,5 @@ def run_export(output_dir: Path) -> None:
     for out in proto.graph.output:
         dims = [d.dim_value for d in out.type.tensor_type.shape.dim]
         print(f"  output '{out.name}': {dims}")
-    print(f"  d_model={d_model}, num_patches={num_patches}")
+    print(f"  d_model={d_model}, patch_size={embedder.patch_size}")
     print("Export complete.")
