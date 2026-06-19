@@ -59,11 +59,26 @@ _MODELS: dict = {
         # `seq` is a dynamic axis but must be a multiple of patch_size 16.
         "validation_dynamic_dims": {"seq": 512},
     },
+    **{
+        f"chronos-bolt-{_size}": {
+            "project": REPO_ROOT / "models" / "chronos-bolt",
+            "module": "chronos_bolt_prep",
+            "hf_repo": f"{HF_ORG}/chronos-bolt-{_size}",
+            "size": _size,
+            # `seq` is a dynamic axis but must be a multiple of patch_size 16.
+            "validation_dynamic_dims": {"seq": 512},
+        }
+        for _size in ("tiny", "mini", "small", "base")
+    },
 }
 
 
 def _run(model: str, command: str, extra: List[str]) -> None:
     info = _MODELS[model]
+    # Some projects bundle several variants in one package (e.g. Chronos-Bolt
+    # sizes); pass the variant through so the sub-package knows which to build.
+    if info.get("size"):
+        extra = [*extra, "--size", info["size"]]
     # Drop VIRTUAL_ENV so uv doesn't warn that the parent venv doesn't match
     # the sub-project's own venv.
     env = {k: v for k, v in os.environ.items() if k != "VIRTUAL_ENV"}
@@ -82,6 +97,15 @@ def _run(model: str, command: str, extra: List[str]) -> None:
         check=True,
         env=env,
     )
+
+
+def _model_onnx_dir(model: str) -> Path:
+    """Default ONNX output dir for a model (per-size subdir for variants)."""
+    info = _MODELS[model]
+    base = Path(info["project"]) / "out"
+    if info.get("size"):
+        base = base / info["size"]
+    return base / "onnx"
 
 
 def _validate_onnx(onnx_dir: Path, dynamic_dims: Optional[dict] = None) -> None:
@@ -188,7 +212,7 @@ def _model_app(model_name: str) -> typer.Typer:
         extra = ["--output-dir", str(output_dir)] if output_dir is not None else []
         _run(model_name, "export", extra)
 
-        onnx_dir = output_dir or (REPO_ROOT / "models" / model_name / "out" / "onnx")
+        onnx_dir = output_dir or _model_onnx_dir(model_name)
 
         for transform in _MODELS[model_name].get("onnx_transformations", []):
             if transform == "bf16_to_f32":
@@ -248,7 +272,7 @@ def _model_app(model_name: str) -> typer.Typer:
             model_name=model_name,
             hf_repo=hf_repo,
             model_dir=model_dir,
-            onnx_dir=onnx_dir or model_dir / "out" / "onnx",
+            onnx_dir=onnx_dir or _model_onnx_dir(model_name),
             token=token,
             create_repo=create_repo,
         )
