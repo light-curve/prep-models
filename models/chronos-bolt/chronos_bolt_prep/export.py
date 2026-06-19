@@ -25,11 +25,13 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import onnx
 import torch
 import torch.nn as nn
 
 from chronos import ChronosBoltPipeline
+
+from prep_models_utils.chronos import masked_instance_norm
+from prep_models_utils.chronos import run_export as run_shared_export
 
 from chronos_bolt_prep.config import hf_repo, hf_revision, output_prefix
 
@@ -67,30 +69,6 @@ class _ChronosBoltEmbedder(nn.Module):
             reg_embed = model.shared(torch.tensor([[reg_id]], dtype=torch.long))
         self.register_buffer("reg_embed", reg_embed.detach())  # (1, 1, d_model)
 
-    def _instance_norm(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
-        """Masked mean/std normalisation, ONNX-compatible (no nanmean)."""
-        # x: (batch, seq), NaN = padding
-        valid = ~torch.isnan(x)
-        zeros = torch.zeros_like(x)
-        x_safe = torch.where(valid, x, zeros)  # NaN -> 0 (NaN * 0.0 != 0 in IEEE 754)
-
-        count = valid.float().sum(dim=-1, keepdim=True).clamp(min=1.0)
-        loc = x_safe.sum(dim=-1, keepdim=True) / count
-
-        residual = torch.where(valid, x - loc, zeros)
-        var = (residual * residual).sum(dim=-1, keepdim=True) / count
-        scale = var.sqrt()
-        # Replace zero scale with eps
-        scale = scale + (scale == 0).float() * self.norm_eps
-
-        normed = torch.where(valid, (x_safe - loc) / scale, zeros)
-        if self.use_arcsinh:
-            # arcsinh(x) = log(x + sqrt(x^2 + 1)) — avoids aten::asinh which has
-            # no TorchScript ONNX symbolic registered in any opset.
-            normed = torch.log(normed + torch.sqrt(normed * normed + 1.0))
-
-        return normed, valid
-
     def forward(self, context: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         # context: (batch, seq), float32, NaN = left-padded / missing.
         # seq must be a multiple of patch_size; it is a dynamic ONNX axis.
@@ -98,7 +76,9 @@ class _ChronosBoltEmbedder(nn.Module):
         P = self.patch_size
 
         # --- 1. Instance normalisation (masked positions become 0) ---
-        normed, valid = self._instance_norm(context)  # (batch, seq)
+        normed, valid = masked_instance_norm(
+            context, eps=self.norm_eps, use_arcsinh=self.use_arcsinh
+        )  # (batch, seq)
 
         # --- 2. Patching: reshape to (batch, num_patches, patch_size) ---
         patches = normed.view(batch, -1, P)  # (B, K, P), K dynamic
@@ -135,49 +115,15 @@ class _ChronosBoltEmbedder(nn.Module):
 
 
 def run_export(output_dir: Path, size: str) -> None:
-    output_dir = Path(output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
-
     print(f"Loading {hf_repo(size)} ...")
     pipeline = _load_pipeline(size)
     pipeline.model.eval()
 
     embedder = _ChronosBoltEmbedder(pipeline)
-    embedder.eval()
-
-    d_model: int = pipeline.model.model_dim
-
-    # The sequence axis is dynamic; this length is only the concrete example
-    # used to trace the export (any multiple of patch_size 16 works).
-    trace_len = 32 * embedder.patch_size  # 512
-    dummy_context = torch.zeros(2, trace_len, dtype=torch.float32)
-    # Left-pad first sample with NaN to exercise the masking path
-    dummy_context[0, : trace_len // 2] = float("nan")
-
-    dynamic_axes = {
-        "context": {0: "batch", 1: "seq"},
-        "mean": {0: "batch"},
-        "sequence": {0: "batch", 1: "num_patches"},
-    }
-
-    out_path = output_dir / f"{output_prefix(size)}.onnx"
-    print(f"Exporting {out_path.name}  (dynamic seq; trace length={trace_len}) ...")
-
-    with torch.no_grad():
-        torch.onnx.export(
-            embedder,
-            (dummy_context,),
-            str(out_path),
-            input_names=["context"],
-            output_names=["mean", "sequence"],
-            dynamic_axes=dynamic_axes,
-            opset_version=18,
-            dynamo=False,
-        )
-
-    proto = onnx.load(str(out_path))
-    for out in proto.graph.output:
-        dims = [d.dim_value for d in out.type.tensor_type.shape.dim]
-        print(f"  output '{out.name}': {dims}")
-    print(f"  d_model={d_model}, patch_size={embedder.patch_size}")
-    print("Export complete.")
+    run_shared_export(
+        output_dir,
+        embedder=embedder,
+        output_prefix=output_prefix(size),
+        d_model=pipeline.model.model_dim,
+        patch_size=embedder.patch_size,
+    )
