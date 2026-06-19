@@ -52,6 +52,13 @@ _MODELS: dict = {
         "module": "astra_clr_prep",
         "hf_repo": f"{HF_ORG}/astra-clr",
     },
+    "chronos2": {
+        "project": REPO_ROOT / "models" / "chronos2",
+        "module": "chronos2_prep",
+        "hf_repo": f"{HF_ORG}/chronos2",
+        # `seq` is a dynamic axis but must be a multiple of patch_size 16.
+        "validation_dynamic_dims": {"seq": 512},
+    },
 }
 
 
@@ -77,9 +84,13 @@ def _run(model: str, command: str, extra: List[str]) -> None:
     )
 
 
-def _validate_onnx(onnx_dir: Path) -> None:
+def _validate_onnx(onnx_dir: Path, dynamic_dims: Optional[dict] = None) -> None:
     import numpy as np
     import onnxruntime as rt
+
+    # Named dynamic dims (e.g. {"seq": 512}) that have a required value or
+    # divisibility constraint the generic "1" default would violate.
+    dynamic_dims = dynamic_dims or {}
 
     _NP_DTYPE = {
         "tensor(float)": np.float32,
@@ -110,11 +121,18 @@ def _validate_onnx(onnx_dir: Path) -> None:
         feeds = {}
         for inp in sess.get_inputs():
             dtype = _NP_DTYPE.get(inp.type, np.float32)
-            # Replace dynamic (None/0/string) dims: first dim → batch=2, rest → 1
-            shape = [
-                2 if i == 0 else (d if isinstance(d, int) and d > 0 else 1)
-                for i, d in enumerate(inp.shape)
-            ]
+            # Pick a concrete size for each axis to build a dummy input.
+            shape = []
+            for axis, dim in enumerate(inp.shape):
+                if isinstance(dim, str) and dim in dynamic_dims:
+                    size = dynamic_dims[dim]  # per-model override for a named axis
+                elif axis == 0:
+                    size = 2  # batch
+                elif isinstance(dim, int) and dim > 0:
+                    size = dim  # static axis: keep as declared
+                else:
+                    size = 1  # any other dynamic axis
+                shape.append(size)
             typer.echo(f"  input  '{inp.name}': {inp.shape}  → feed shape {shape}")
             feeds[inp.name] = np.zeros(shape, dtype=dtype)
 
@@ -185,7 +203,7 @@ def _model_app(model_name: str) -> typer.Typer:
             else:
                 raise ValueError(f"Unknown ONNX transformation: {transform!r}")
 
-        _validate_onnx(onnx_dir)
+        _validate_onnx(onnx_dir, _MODELS[model_name].get("validation_dynamic_dims"))
 
     @sub.command("test-data")
     def test_data(
