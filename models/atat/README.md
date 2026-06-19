@@ -39,8 +39,11 @@ Becker, I., Pignata, G., Förster, F., Estévez, P. A., Cabrera-Vives, G., Vera,
 
 ## License
 
-The original ATAT repository has no license as of the time of writing (see [alercebroker/ATAT#2](https://github.com/alercebroker/ATAT/issues/2)).
-Until a license is added upstream, the ONNX models cannot be published to HuggingFace.
+Apache-2.0 (Copyright 2026 ALeRCE Collaboration) — matching the upstream
+[alercebroker/ATAT](https://github.com/alercebroker/ATAT/blob/main/LICENSE)
+repository, which adopted a license following
+[alercebroker/ATAT#2](https://github.com/alercebroker/ATAT/issues/2). See
+[LICENSE](LICENSE).
 
 ## Model overview
 
