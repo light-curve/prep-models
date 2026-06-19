@@ -16,6 +16,7 @@ Each HuggingFace repository carries the original model's license and a README wi
 | [Astromer 2](models/astromer2/README.md) | TensorFlow 2.14 | MIT | [light-curve/astromer2](https://huggingface.co/light-curve/astromer2) | implemented |
 | [ATAT](models/atat/README.md) | PyTorch | Apache-2.0 | pending | implemented |
 | [ATCAT](models/atcat/README.md) | PyTorch | MIT (non-military use restriction) | [light-curve/atcat](https://huggingface.co/light-curve/atcat) | implemented |
+| [Chronos 2](models/chronos2/README.md) | PyTorch | Apache-2.0 | pending | implemented |
 
 ## Architecture
 
@@ -47,11 +48,13 @@ Request only the output(s) you need — onnxruntime prunes unused computation.
 | Model | File(s) | Output names |
 |-------|---------|--------------|
 | AstraCLR | `astra_clr.onnx` | `mean` |
+| AstroM3 | `astrom3.onnx` | `mean`, `sequence` |
 | Astromer 1 | `astromer1.onnx` | `mean`, `max`, `sequence` |
 | Astromer 1 (ZTF DR20 g-band) | `astromer1_ztfdr20.onnx` | `mean`, `max`, `sequence` |
 | Astromer 2 | `astromer2.onnx` | `mean`, `max`, `sequence` |
 | ATAT | `atat.onnx` | `token`, `mean`, `sequence` |
 | ATCAT | `atcat_bf16.onnx`, `atcat_f32.onnx` | `last`, `mean`, `sequence` |
+| Chronos 2 | `chronos2.onnx` | `mean`, `sequence` |
 
 `sequence` is the per-element transformer output (`[batch, seq_len, embedding_dim]`); for ATAT the CLS token is excluded.
 `token` (ATAT only) is the CLS token — a dedicated global representation prepended to the sequence and excluded from `sequence`.
