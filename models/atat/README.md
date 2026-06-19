@@ -9,6 +9,10 @@ library_name: onnx
 
 # ATAT
 
+> Part of the **[light-curve](https://github.com/light-curve)** family of open-source tools for astronomical time-series analysis.
+> Available from Python via the [`light-curve`](https://light-curve.snad.space/) package — `pip install light-curve`.
+> Documentation: <https://light-curve.snad.space/>
+
 ## Paper
 
 Becker, I., Pignata, G., Förster, F., Estévez, P. A., Cabrera-Vives, G., Vera, E., Carrasco-Davis, R., Astorga, N., Sanchez-Saez, P., Catelan, M., Cortés, C. C., de Jaeger, T., Pezoa, F., & Reyes, I. (2024). *ATAT: Astronomical Transformer for time series And Tabular data*. Astronomy & Astrophysics, 691, A163.
