@@ -121,14 +121,18 @@ def _validate_onnx(onnx_dir: Path, dynamic_dims: Optional[dict] = None) -> None:
         feeds = {}
         for inp in sess.get_inputs():
             dtype = _NP_DTYPE.get(inp.type, np.float32)
-            # Replace dynamic dims: named dims with a per-model override take
-            # priority; otherwise first dim → batch=2, remaining dynamic → 1.
-            shape = [
-                dynamic_dims[d]
-                if isinstance(d, str) and d in dynamic_dims
-                else (2 if i == 0 else (d if isinstance(d, int) and d > 0 else 1))
-                for i, d in enumerate(inp.shape)
-            ]
+            # Pick a concrete size for each axis to build a dummy input.
+            shape = []
+            for axis, dim in enumerate(inp.shape):
+                if isinstance(dim, str) and dim in dynamic_dims:
+                    size = dynamic_dims[dim]  # per-model override for a named axis
+                elif axis == 0:
+                    size = 2  # batch
+                elif isinstance(dim, int) and dim > 0:
+                    size = dim  # static axis: keep as declared
+                else:
+                    size = 1  # any other dynamic axis
+                shape.append(size)
             typer.echo(f"  input  '{inp.name}': {inp.shape}  → feed shape {shape}")
             feeds[inp.name] = np.zeros(shape, dtype=dtype)
 

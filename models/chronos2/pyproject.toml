@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "chronos2-prep"
 version = "0.1.0"
 description = "Chronos 2 ONNX prep sub-package"
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 dependencies = [
     "chronos-forecasting==2.3.0",
     "numpy>=1.26",

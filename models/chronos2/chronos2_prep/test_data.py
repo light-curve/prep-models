@@ -22,18 +22,18 @@ from chronos2_prep.export import _Chronos2Embedder, _load_pipeline
 
 _RNG = np.random.default_rng(42)
 
-# Observation schema stored in the parquet (same as other models in this repo)
+# Observation schema stored in the parquet. The model consumes only the
+# magnitudes; mjd is kept to record the (irregular) sampling of each curve.
 _OBS_TYPE = pa.struct(
     [
         pa.field("mjd", pa.float64()),
         pa.field("mag", pa.float32()),
-        pa.field("magerr", pa.float32()),
     ]
 )
 
 
 def _synthetic_curve(n_obs: int) -> dict:
-    """Return one synthetic periodic light curve as a dict."""
+    """Return one synthetic periodic light curve as {mjd, mag}."""
     period = _RNG.uniform(10.0, 200.0)
     amplitude = _RNG.uniform(0.05, 0.5)
     phase = _RNG.uniform(0.0, 2 * np.pi)
@@ -43,18 +43,9 @@ def _synthetic_curve(n_obs: int) -> dict:
     # Irregular time sampling over ~3 years
     mjd = np.sort(_RNG.uniform(58000.0, 59095.0, size=n_obs))
     mag = baseline + amplitude * np.sin(2 * np.pi * mjd / period + phase)
-    magerr = _RNG.uniform(noise_sigma * 0.5, noise_sigma * 1.5, size=n_obs).astype(
-        np.float32
-    )
     mag = (mag + _RNG.normal(0.0, noise_sigma, size=n_obs)).astype(np.float32)
 
-    return {
-        "mjd": mjd.tolist(),
-        "mag": mag.tolist(),
-        "magerr": magerr.tolist(),
-        "period": float(period),
-        "amplitude": float(amplitude),
-    }
+    return {"mjd": mjd.tolist(), "mag": mag.tolist()}
 
 
 # Bounds on the number of observations per curve.  The model's native context
@@ -120,22 +111,18 @@ def _save(curves: list[dict], embeddings: np.ndarray, path: Path) -> None:
     schema = pa.schema(
         [
             pa.field("lightcurve", pa.list_(_OBS_TYPE)),
-            pa.field("period", pa.float64()),
-            pa.field("amplitude", pa.float64()),
             pa.field("embedding_mean", pa.list_(pa.float32(), d_model)),
         ]
     )
     rows = []
     for i, curve in enumerate(curves):
         obs = [
-            {"mjd": float(t), "mag": float(m), "magerr": float(e)}
-            for t, m, e in zip(curve["mjd"], curve["mag"], curve["magerr"])
+            {"mjd": float(t), "mag": float(m)}
+            for t, m in zip(curve["mjd"], curve["mag"])
         ]
         rows.append(
             {
                 "lightcurve": obs,
-                "period": curve["period"],
-                "amplitude": curve["amplitude"],
                 "embedding_mean": embeddings[i].tolist(),
             }
         )
