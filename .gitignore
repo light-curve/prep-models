@@ -6,4 +6,5 @@ tmp_*/
 models/*/weights/
 models/*/data/
 models/*/out/onnx/
+models/*/out/*/onnx/
 **/*.egg-info/

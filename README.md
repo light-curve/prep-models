@@ -17,6 +17,10 @@ Each HuggingFace repository carries the original model's license and a README wi
 | [ATAT](models/atat/README.md) | PyTorch | Apache-2.0 | pending | implemented |
 | [ATCAT](models/atcat/README.md) | PyTorch | MIT (non-military use restriction) | [light-curve/atcat](https://huggingface.co/light-curve/atcat) | implemented |
 | [Chronos 2](models/chronos2/README.md) | PyTorch | Apache-2.0 | pending | implemented |
+| [Chronos-Bolt (base)](models/chronos-bolt/README.md) | PyTorch | Apache-2.0 | pending | implemented |
+| [Chronos-Bolt (mini)](models/chronos-bolt/README.md) | PyTorch | Apache-2.0 | pending | implemented |
+| [Chronos-Bolt (small)](models/chronos-bolt/README.md) | PyTorch | Apache-2.0 | pending | implemented |
+| [Chronos-Bolt (tiny)](models/chronos-bolt/README.md) | PyTorch | Apache-2.0 | pending | implemented |
 
 ## Architecture
 
@@ -55,6 +59,10 @@ Request only the output(s) you need — onnxruntime prunes unused computation.
 | ATAT | `atat.onnx` | `token`, `mean`, `sequence` |
 | ATCAT | `atcat_bf16.onnx`, `atcat_f32.onnx` | `last`, `mean`, `sequence` |
 | Chronos 2 | `chronos2.onnx` | `mean`, `sequence` |
+| Chronos-Bolt (base) | `chronos-bolt-base.onnx` | `mean`, `sequence` |
+| Chronos-Bolt (mini) | `chronos-bolt-mini.onnx` | `mean`, `sequence` |
+| Chronos-Bolt (small) | `chronos-bolt-small.onnx` | `mean`, `sequence` |
+| Chronos-Bolt (tiny) | `chronos-bolt-tiny.onnx` | `mean`, `sequence` |
 
 `sequence` is the per-element transformer output (`[batch, seq_len, embedding_dim]`); for ATAT the CLS token is excluded.
 `token` (ATAT only) is the CLS token — a dedicated global representation prepended to the sequence and excluded from `sequence`.
