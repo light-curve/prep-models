@@ -1,5 +1,9 @@
 # AstraCLR
 
+> Part of the **[light-curve](https://github.com/light-curve)** family of open-source tools for astronomical time-series analysis.
+> Available from Python via the [`light-curve`](https://light-curve.snad.space/) package — `pip install light-curve`.
+> Documentation: <https://light-curve.snad.space/>
+
 ## Paper
 
 Majumder et al., 2026, in prep.
