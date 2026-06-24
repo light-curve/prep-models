@@ -28,7 +28,8 @@ dependencies = [
     { name = "pandas" },
     { name = "prep-models-utils" },
     { name = "pyarrow" },
-    { name = "tensorflow", marker = "platform_machine != 'arm64' or sys_platform != 'darwin'" },
+    { name = "tensorflow", marker = "(platform_machine != 'arm64' and sys_platform == 'darwin') or (platform_machine != 'aarch64' and sys_platform == 'linux') or (sys_platform != 'darwin' and sys_platform != 'linux')" },
+    { name = "tensorflow-cpu-aws", marker = "platform_machine == 'aarch64' and sys_platform == 'linux'" },
     { name = "tensorflow-macos", marker = "platform_machine == 'arm64' and sys_platform == 'darwin'" },
     { name = "tf2onnx" },
     { name = "toml" },
@@ -43,7 +44,8 @@ requires-dist = [
     { name = "pandas", specifier = ">=1.5" },
     { name = "prep-models-utils", editable = "../../utils" },
     { name = "pyarrow", specifier = ">=12" },
-    { name = "tensorflow", marker = "platform_machine != 'arm64' or sys_platform != 'darwin'", specifier = "==2.14.*" },
+    { name = "tensorflow", marker = "(platform_machine != 'arm64' and sys_platform == 'darwin') or (platform_machine != 'aarch64' and sys_platform == 'linux') or (sys_platform != 'darwin' and sys_platform != 'linux')", specifier = "==2.14.*" },
+    { name = "tensorflow-cpu-aws", marker = "platform_machine == 'aarch64' and sys_platform == 'linux'", specifier = "==2.14.*" },
     { name = "tensorflow-macos", marker = "platform_machine == 'arm64' and sys_platform == 'darwin'", specifier = "==2.14.*" },
     { name = "tf2onnx", specifier = ">=1.16" },
     { name = "toml", specifier = ">=0.10" },
@@ -701,6 +703,38 @@ wheels = [
 ]
 
 [[package]]
+name = "tensorflow-cpu-aws"
+version = "2.14.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "absl-py", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "astunparse", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "flatbuffers", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "gast", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "google-pasta", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "grpcio", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "h5py", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "keras", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "libclang", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "ml-dtypes", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "numpy", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "opt-einsum", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "packaging", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "protobuf", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "setuptools", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "six", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "tensorboard", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "tensorflow-estimator", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "tensorflow-io-gcs-filesystem", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "termcolor", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "typing-extensions", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "wrapt", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e7/a3/467dc9d42d3bb511575a53c2d2cd6c8c92b3f50d845ebbb03007a9dcc78a/tensorflow_cpu_aws-2.14.1-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:618af0ac57a7bb6b51c9b409c2838c9910ca2fd2ae2b1f986ae98ebf59a919e5", size = 262879335, upload-time = "2023-11-15T00:29:55.463Z" },
+]
+
+[[package]]
 name = "tensorflow-estimator"
 version = "2.14.0"
 source = { registry = "https://pypi.org/simple" }
@@ -724,28 +758,28 @@ name = "tensorflow-macos"
 version = "2.14.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "absl-py" },
-    { name = "astunparse" },
-    { name = "flatbuffers" },
-    { name = "gast" },
-    { name = "google-pasta" },
-    { name = "grpcio" },
-    { name = "h5py" },
-    { name = "keras" },
-    { name = "libclang" },
-    { name = "ml-dtypes" },
-    { name = "numpy" },
-    { name = "opt-einsum" },
-    { name = "packaging" },
-    { name = "protobuf" },
-    { name = "setuptools" },
-    { name = "six" },
-    { name = "tensorboard" },
-    { name = "tensorflow-estimator" },
-    { name = "tensorflow-io-gcs-filesystem" },
-    { name = "termcolor" },
-    { name = "typing-extensions" },
-    { name = "wrapt" },
+    { name = "absl-py", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "astunparse", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "flatbuffers", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "gast", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "google-pasta", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "grpcio", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "h5py", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "keras", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "libclang", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "ml-dtypes", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "numpy", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "opt-einsum", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "packaging", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "protobuf", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "setuptools", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "six", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "tensorboard", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "tensorflow-estimator", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "tensorflow-io-gcs-filesystem", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "termcolor", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "typing-extensions", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "wrapt", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/d9/47/22c3cc27b8abeefaef607ac84df51497f864ff1efb68e0a97a2bd6018675/tensorflow_macos-2.14.1-cp311-cp311-macosx_12_0_arm64.whl", hash = "sha256:428f071cf9e901c8182be9f7278a79beea6f9e4b687bf0d5e8e8faefb7bcc760", size = 199718890, upload-time = "2023-11-14T19:49:21.709Z" },

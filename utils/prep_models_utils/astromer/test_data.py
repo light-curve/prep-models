@@ -25,16 +25,24 @@ def run_test_data(
     print("Loading light curves ...")
     curves = load_curves(n_samples)
 
-    print("Applying original Astromer preprocessing ...")
     if preprocess_fn is None:
         raise ValueError("preprocess_fn is required")
     _preprocess = preprocess_fn
-    batch = _preprocess(config, curves)
 
-    print("Loading model and computing embeddings ...")
+    print("Loading model ...")
     model, _ = load_model()
     encoder = model.get_layer("encoder")
-    embeddings = run_encoder_mean(encoder, batch)
+
+    # Embed each light curve independently from its first ``max_obs`` observations
+    # (reduction="beginning").  The upstream ``get_windows`` splits a curve whose
+    # length is an exact multiple of ``max_obs`` into more than one window, which
+    # would make the batched embeddings outnumber the curves and misalign the
+    # per-curve storage below.  Processing one curve at a time and keeping its
+    # first window guarantees exactly one embedding per curve, aligned by index.
+    print("Applying original Astromer preprocessing and computing embeddings ...")
+    embeddings = np.stack(
+        [run_encoder_mean(encoder, _preprocess(config, [curve]))[0] for curve in curves]
+    )
 
     rows = []
     for idx, curve in enumerate(curves):
