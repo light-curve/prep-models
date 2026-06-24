@@ -7,20 +7,20 @@ Each HuggingFace repository carries the original model's license and a README wi
 
 ## Models
 
-| Model | Framework | License | HuggingFace | Status |
-|-------|-----------|---------|-------------|--------|
-| [AstraCLR](models/astra-clr/README.md) | ONNX (pre-built) | MIT | [light-curve/astra-clr](https://huggingface.co/light-curve/astra-clr) | implemented |
-| [AstroM3](models/astrom3/README.md) | PyTorch | MIT (code), CC BY 4.0 (weights) | [light-curve/astrom3](https://huggingface.co/light-curve/astrom3) | implemented |
-| [Astromer 1](models/astromer1/README.md) | TensorFlow 2.14 | MIT | [light-curve/astromer1](https://huggingface.co/light-curve/astromer1) | implemented |
-| [Astromer 1 (ZTF DR20 g-band)](models/astromer1-ztfdr20/README.md) | TensorFlow 2.14 | GPL-3.0 | [light-curve/astromer1-ztfdr20](https://huggingface.co/light-curve/astromer1-ztfdr20) | implemented |
-| [Astromer 2](models/astromer2/README.md) | TensorFlow 2.14 | MIT | [light-curve/astromer2](https://huggingface.co/light-curve/astromer2) | implemented |
-| [ATAT](models/atat/README.md) | PyTorch | Apache-2.0 | pending | implemented |
-| [ATCAT](models/atcat/README.md) | PyTorch | MIT (non-military use restriction) | [light-curve/atcat](https://huggingface.co/light-curve/atcat) | implemented |
-| [Chronos 2](models/chronos2/README.md) | PyTorch | Apache-2.0 | pending | implemented |
-| [Chronos-Bolt (base)](models/chronos-bolt/README.md) | PyTorch | Apache-2.0 | pending | implemented |
-| [Chronos-Bolt (mini)](models/chronos-bolt/README.md) | PyTorch | Apache-2.0 | pending | implemented |
-| [Chronos-Bolt (small)](models/chronos-bolt/README.md) | PyTorch | Apache-2.0 | pending | implemented |
-| [Chronos-Bolt (tiny)](models/chronos-bolt/README.md) | PyTorch | Apache-2.0 | pending | implemented |
+| Model | Framework | License | HuggingFace |
+|-------|-----------|---------|-------------|
+| [AstraCLR](models/astra-clr/README.md) | ONNX (pre-built) | MIT | [light-curve/astra-clr](https://huggingface.co/light-curve/astra-clr) |
+| [AstroM3](models/astrom3/README.md) | PyTorch | MIT (code), CC BY 4.0 (weights) | [light-curve/astrom3](https://huggingface.co/light-curve/astrom3) |
+| [Astromer 1](models/astromer1/README.md) | TensorFlow 2.14 | MIT | [light-curve/astromer1](https://huggingface.co/light-curve/astromer1) |
+| [Astromer 1 (ZTF DR20 g-band)](models/astromer1-ztfdr20/README.md) | TensorFlow 2.14 | GPL-3.0 | [light-curve/astromer1-ztfdr20](https://huggingface.co/light-curve/astromer1-ztfdr20) |
+| [Astromer 2](models/astromer2/README.md) | TensorFlow 2.14 | MIT | [light-curve/astromer2](https://huggingface.co/light-curve/astromer2) |
+| [ATAT](models/atat/README.md) | PyTorch | Apache-2.0 | [light-curve/atat](https://huggingface.co/light-curve/atat) |
+| [ATCAT](models/atcat/README.md) | PyTorch | MIT (non-military use restriction) | [light-curve/atcat](https://huggingface.co/light-curve/atcat) |
+| [Chronos 2](models/chronos2/README.md) | PyTorch | Apache-2.0 | [light-curve/chronos2](https://huggingface.co/light-curve/chronos2) |
+| [Chronos-Bolt (base)](models/chronos-bolt/README.md) | PyTorch | Apache-2.0 | [light-curve/chronos-bolt-base](https://huggingface.co/light-curve/chronos-bolt-base) |
+| [Chronos-Bolt (mini)](models/chronos-bolt/README.md) | PyTorch | Apache-2.0 | [light-curve/chronos-bolt-mini](https://huggingface.co/light-curve/chronos-bolt-mini) |
+| [Chronos-Bolt (small)](models/chronos-bolt/README.md) | PyTorch | Apache-2.0 | [light-curve/chronos-bolt-small](https://huggingface.co/light-curve/chronos-bolt-small) |
+| [Chronos-Bolt (tiny)](models/chronos-bolt/README.md) | PyTorch | Apache-2.0 | [light-curve/chronos-bolt-tiny](https://huggingface.co/light-curve/chronos-bolt-tiny) |
 
 ## Architecture
 
