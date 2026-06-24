@@ -26,6 +26,9 @@ CONF = {
 MODEL_DIR = Path(__file__).resolve().parents[1]
 CODE_DIR = MODEL_DIR / "code"
 WEIGHTS_DIR = MODEL_DIR / "weights"
+DATA_DIR = MODEL_DIR / "data"
+ZTF_RECORDS_DIR = DATA_DIR / "ztf-records"
+ZTF_RECORDS_FILENAME = "ztf_dr17_gband.parquet"
 
 CONFIG = AstromerConfig(
     model_name="Astromer 1 (ZTF DR20 g-band)",
