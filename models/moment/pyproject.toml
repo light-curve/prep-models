@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "moment-prep"
+version = "0.1.0"
+description = "MOMENT-1 ONNX prep sub-package (small/base/large)"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "momentfm==0.1.4",
+    "onnx>=1.16",
+    "onnxruntime>=1.17",
+    "pyarrow>=14",
+    "prep-models-utils",
+]
+
+[tool.uv.sources]
+prep-models-utils = { path = "../../utils", editable = true }
+
+[tool.setuptools.packages.find]
+include = ["moment_prep*"]

@@ -70,6 +70,15 @@ _MODELS: dict = {
         }
         for _size in ("tiny", "mini", "small", "base")
     },
+    **{
+        f"moment1-{_size}": {
+            "project": REPO_ROOT / "models" / "moment",
+            "module": "moment_prep",
+            "hf_repo": f"{HF_ORG}/moment1-{_size}",
+            "size": _size,
+        }
+        for _size in ("small", "base", "large")
+    },
 }
 
 
