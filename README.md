@@ -21,6 +21,9 @@ Each HuggingFace repository carries the original model's license and a README wi
 | [Chronos-Bolt (mini)](models/chronos-bolt/README.md) | PyTorch | Apache-2.0 | [light-curve/chronos-bolt-mini](https://huggingface.co/light-curve/chronos-bolt-mini) |
 | [Chronos-Bolt (small)](models/chronos-bolt/README.md) | PyTorch | Apache-2.0 | [light-curve/chronos-bolt-small](https://huggingface.co/light-curve/chronos-bolt-small) |
 | [Chronos-Bolt (tiny)](models/chronos-bolt/README.md) | PyTorch | Apache-2.0 | [light-curve/chronos-bolt-tiny](https://huggingface.co/light-curve/chronos-bolt-tiny) |
+| [MOMENT-1 (small)](models/moment/README.md) | PyTorch | MIT | [light-curve/moment1-small](https://huggingface.co/light-curve/moment1-small) |
+| [MOMENT-1 (base)](models/moment/README.md) | PyTorch | MIT | [light-curve/moment1-base](https://huggingface.co/light-curve/moment1-base) |
+| [MOMENT-1 (large)](models/moment/README.md) | PyTorch | MIT | [light-curve/moment1-large](https://huggingface.co/light-curve/moment1-large) |
 
 ## Architecture
 
@@ -63,6 +66,9 @@ Request only the output(s) you need — onnxruntime prunes unused computation.
 | Chronos-Bolt (mini) | `chronos-bolt-mini.onnx` | `mean`, `sequence` |
 | Chronos-Bolt (small) | `chronos-bolt-small.onnx` | `mean`, `sequence` |
 | Chronos-Bolt (tiny) | `chronos-bolt-tiny.onnx` | `mean`, `sequence` |
+| MOMENT-1 (small) | `moment1-small.onnx` | `mean`, `sequence` |
+| MOMENT-1 (base) | `moment1-base.onnx` | `mean`, `sequence` |
+| MOMENT-1 (large) | `moment1-large.onnx` | `mean`, `sequence` |
 
 `sequence` is the per-element transformer output (`[batch, seq_len, embedding_dim]`); for ATAT the CLS token is excluded.
 `token` (ATAT only) is the CLS token — a dedicated global representation prepended to the sequence and excluded from `sequence`.
