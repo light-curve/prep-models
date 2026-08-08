@@ -9,7 +9,7 @@ description = "CLI orchestrator for converting open-weight light-curve models to
 requires-python = ">=3.14"
 dependencies = [
     "typer>=0.26.7",
-    "huggingface-hub>=0.20",
+    "huggingface-hub>=1.26.0",
     "onnx>=1.16",
     "onnxruntime>=1.28.0",
 ]
