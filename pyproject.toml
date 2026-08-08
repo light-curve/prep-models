@@ -22,3 +22,8 @@ include = ["prep_models*"]
 
 [tool.ruff]
 exclude = ["models/*/code"]
+
+[tool.ruff.lint]
+ignore = [
+    "B008",  # Typer uses function calls in defaults (typer.Option)
+]

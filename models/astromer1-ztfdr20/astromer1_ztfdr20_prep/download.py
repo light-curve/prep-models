@@ -8,7 +8,6 @@ from pathlib import Path
 
 import pandas as pd
 import requests
-
 from prep_models_utils.zenodo import download_zenodo_file, get_zenodo_files
 
 from astromer1_ztfdr20_prep.config import (

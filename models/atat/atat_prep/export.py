@@ -22,7 +22,7 @@ from pathlib import Path
 
 import onnx
 import torch
-import torch.nn as nn
+from torch import nn
 
 from atat_prep.config import (
     CODE_DIR,
@@ -50,7 +50,7 @@ def load_encoder() -> nn.Module:
     directly, and copy only the encoder weights.
     """
     _add_code_to_path()
-    from layers.encoder_ellastic import Encoder  # noqa: PLC0415
+    from layers.encoder_ellastic import Encoder
 
     ckpt = WEIGHTS_DIR / "checkpoint.ckpt"
     if not ckpt.exists():
@@ -189,7 +189,7 @@ class _ATATEmbedderMulti(nn.Module):
 
         emb_x = self.encoder.transformer(emb_x, full_mask)
 
-        embedding_token = emb_x[:, 0, :] if has_token else emb_x[:, 0, :]
+        embedding_token = emb_x[:, 0, :]
         seq_emb = emb_x[:, 1:, :] if has_token else emb_x
         denom = sorted_mask.sum(dim=1).clamp(min=1.0)
         embedding_mean = (seq_emb * sorted_mask).sum(dim=1) / denom

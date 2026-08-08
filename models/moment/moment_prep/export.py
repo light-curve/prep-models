@@ -27,9 +27,8 @@ from pathlib import Path
 
 import onnx
 import torch
-import torch.nn as nn
-
 from momentfm import MOMENTPipeline
+from torch import nn
 
 from moment_prep.config import PATCH_LEN, SEQ_LEN, hf_repo, hf_revision, output_prefix
 

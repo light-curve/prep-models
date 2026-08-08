@@ -1,6 +1,5 @@
 import hashlib
 from pathlib import Path
-from typing import Optional
 
 import requests
 from tqdm import tqdm
@@ -9,7 +8,7 @@ from tqdm import tqdm
 def download_file(
     url: str,
     dest: Path,
-    sha256: Optional[str] = None,
+    sha256: str | None = None,
     chunk_size: int = 1 << 20,
 ) -> Path:
     """Stream-download url to dest, with optional SHA-256 verification.

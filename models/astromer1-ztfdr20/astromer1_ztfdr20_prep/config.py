@@ -2,7 +2,6 @@ from pathlib import Path
 
 from prep_models_utils.astromer import AstromerConfig
 
-
 # Zenodo record 16410988 contains ANN_clf.* — the full FCATT model
 # (encoder retrained on ZTF DR20 g-band + FC classification head).
 # We download ANN_clf.* and rename to weights.* so the standard

@@ -4,7 +4,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-
 from prep_models_utils.astromer import run_test_data as run_shared_test_data
 
 from astromer1_ztfdr20_prep.config import CONFIG, ZTF_RECORDS_DIR, ZTF_RECORDS_FILENAME
