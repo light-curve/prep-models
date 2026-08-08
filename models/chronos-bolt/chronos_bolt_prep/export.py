@@ -26,12 +26,10 @@ from __future__ import annotations
 from pathlib import Path
 
 import torch
-import torch.nn as nn
-
 from chronos import ChronosBoltPipeline
-
 from prep_models_utils.chronos import masked_instance_norm
 from prep_models_utils.chronos import run_export as run_shared_export
+from torch import nn
 
 from chronos_bolt_prep.config import hf_repo, hf_revision, output_prefix
 

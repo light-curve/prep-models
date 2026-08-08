@@ -1,7 +1,6 @@
 import os
 import subprocess
 from pathlib import Path
-from typing import List, Optional
 
 import typer
 
@@ -82,7 +81,7 @@ _MODELS: dict = {
 }
 
 
-def _run(model: str, command: str, extra: List[str]) -> None:
+def _run(model: str, command: str, extra: list[str]) -> None:
     info = _MODELS[model]
     # Some projects bundle several variants in one package (e.g. Chronos-Bolt
     # sizes); pass the variant through so the sub-package knows which to build.
@@ -117,7 +116,7 @@ def _model_onnx_dir(model: str) -> Path:
     return base / "onnx"
 
 
-def _validate_onnx(onnx_dir: Path, dynamic_dims: Optional[dict] = None) -> None:
+def _validate_onnx(onnx_dir: Path, dynamic_dims: dict | None = None) -> None:
     import numpy as np
     import onnxruntime as rt
 
@@ -210,7 +209,7 @@ def _model_app(model_name: str) -> typer.Typer:
 
     @sub.command("export")
     def export(
-        output_dir: Optional[Path] = typer.Option(
+        output_dir: Path | None = typer.Option(
             None,
             "--output-dir",
             "-o",
@@ -240,7 +239,7 @@ def _model_app(model_name: str) -> typer.Typer:
 
     @sub.command("test-data")
     def test_data(
-        output_dir: Optional[Path] = typer.Option(
+        output_dir: Path | None = typer.Option(
             None,
             "--output-dir",
             "-o",
@@ -256,13 +255,13 @@ def _model_app(model_name: str) -> typer.Typer:
 
     @sub.command("upload")
     def upload(
-        onnx_dir: Optional[Path] = typer.Option(
+        onnx_dir: Path | None = typer.Option(
             None,
             "--onnx-dir",
             "-i",
             help="Directory containing ONNX files (default: models/<name>/out/onnx/).",
         ),
-        token: Optional[str] = typer.Option(
+        token: str | None = typer.Option(
             None,
             "--token",
             envvar="HF_TOKEN",

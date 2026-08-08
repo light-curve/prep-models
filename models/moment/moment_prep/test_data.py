@@ -21,7 +21,7 @@ import pyarrow.parquet as pq
 import torch
 
 from moment_prep.config import SEQ_LEN, output_prefix
-from moment_prep.export import _MomentEmbedder, _load_model
+from moment_prep.export import _load_model, _MomentEmbedder
 
 # Observation schema stored in the parquet.  The model consumes only the
 # magnitudes; mjd is kept to record the (irregular) sampling of each curve.
@@ -54,7 +54,7 @@ def _synthetic_curve(rng: np.random.Generator, n_obs: int) -> dict:
 def _log_uniform_n_obs(rng: np.random.Generator, max_obs: int) -> int:
     """Draw a log-uniform observation count in [_MIN_OBS, max_obs]."""
     log_n = rng.uniform(np.log(_MIN_OBS), np.log(max_obs))
-    return int(round(float(np.exp(log_n))))
+    return round(float(np.exp(log_n)))
 
 
 def _context_for_curve(curve: dict) -> torch.Tensor:

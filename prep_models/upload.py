@@ -1,7 +1,6 @@
 """Upload ONNX files, test data, README, and LICENSE to HuggingFace."""
 
 from pathlib import Path
-from typing import Optional
 
 
 def run_upload(
@@ -9,7 +8,7 @@ def run_upload(
     hf_repo: str,
     model_dir: Path,
     onnx_dir: Path,
-    token: Optional[str],
+    token: str | None,
     create_repo: bool,
 ) -> None:
     from huggingface_hub import HfApi

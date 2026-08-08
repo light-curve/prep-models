@@ -29,12 +29,10 @@ from __future__ import annotations
 from pathlib import Path
 
 import torch
-import torch.nn as nn
-
 from chronos import Chronos2Pipeline
-
 from prep_models_utils.chronos import masked_instance_norm
 from prep_models_utils.chronos import run_export as run_shared_export
+from torch import nn
 
 from chronos2_prep.config import HF_REPO, HF_REVISION, OUTPUT_PREFIX
 

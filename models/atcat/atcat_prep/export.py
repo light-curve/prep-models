@@ -7,8 +7,8 @@ from pathlib import Path
 
 import onnx
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
+from torch import nn
 
 from atcat_prep.config import OUTPUT_PREFIX
 from atcat_prep.runtime import add_code_to_path, load_model

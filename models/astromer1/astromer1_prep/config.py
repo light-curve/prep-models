@@ -2,7 +2,6 @@ from pathlib import Path
 
 from prep_models_utils.astromer import AstromerConfig
 
-
 ZENODO_RECORD_ID = "18207945"
 ZENODO_KEY = "pt_macho_v1_2021.zip"
 

@@ -6,7 +6,7 @@ from pathlib import Path
 
 import onnx
 import torch
-import torch.nn as nn
+from torch import nn
 
 
 def run_export(

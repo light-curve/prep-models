@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import numpy as np
 import toml
-
 from prep_models_utils.astromer.common import AstromerConfig, add_code_to_path
 
 _WINDOW_SIZE = 200
@@ -20,8 +19,8 @@ _WINDOW_SIZE = 200
 
 def preprocess_curves(config: AstromerConfig, curves: list[dict]) -> dict:
     add_code_to_path(config.code_dir)
-    from src.data.loaders import load_numpy, format_inp_astromer
     from src.data import preprocessing as pp
+    from src.data.loaders import format_inp_astromer, load_numpy
     from src.data.masking import mask_dataset
 
     samples = [

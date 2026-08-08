@@ -8,7 +8,6 @@ max_obs=200 observations per light curve.
 from __future__ import annotations
 
 import numpy as np
-
 from prep_models_utils.astromer.common import AstromerConfig, add_code_to_path
 
 _WINDOW_SIZE = 200

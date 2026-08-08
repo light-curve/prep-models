@@ -7,8 +7,8 @@ from pathlib import Path
 
 import onnx
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
+from torch import nn
 
 from astrom3_prep.config import ENC_IN, OUTPUT_PREFIX, SEQ_LEN
 from astrom3_prep.runtime import add_code_to_path, load_model

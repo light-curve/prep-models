@@ -18,7 +18,7 @@ import numpy as np
 import pyarrow as pa
 import pyarrow.parquet as pq
 import torch
-import torch.nn as nn
+from torch import nn
 
 # Observation schema stored in the parquet. The model consumes only the
 # magnitudes; mjd is kept to record the (irregular) sampling of each curve.
@@ -56,7 +56,7 @@ def _log_uniform_n_obs(rng: np.random.Generator, max_obs: int) -> int:
     (odd, non-round) lengths, exercising the dynamic ONNX sequence axis.
     """
     log_n = rng.uniform(np.log(_MIN_OBS), np.log(max_obs))
-    return int(round(float(np.exp(log_n))))
+    return round(float(np.exp(log_n)))
 
 
 def _context_for_curve(curve: dict, max_obs: int) -> torch.Tensor:

@@ -25,6 +25,7 @@ def load_model():
 
     add_code_to_path()
     from model import Informer
+
     from astrom3_prep.config import (
         ACTIVATION,
         D_FF,

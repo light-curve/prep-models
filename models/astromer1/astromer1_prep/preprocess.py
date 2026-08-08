@@ -10,7 +10,6 @@ observations before calling load_numpy (the same first-window behaviour as the
 from __future__ import annotations
 
 import numpy as np
-
 from prep_models_utils.astromer.common import AstromerConfig, add_code_to_path
 
 _WINDOW_SIZE = 200
