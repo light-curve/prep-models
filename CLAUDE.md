@@ -20,7 +20,19 @@ logic, tests, and documentation in the surrounding non-submodule package files.
 
 The root CLI never imports ML libraries. It calls model sub-packages via:
 ```python
-subprocess.run(["uv", "run", "--project", "models/<name>", "python", "-m", "<name>_prep", command, ...])
+subprocess.run(
+    [
+        "uv",
+        "run",
+        "--project",
+        "models/<name>",
+        "python",
+        "-m",
+        "<name>_prep",
+        command,
+        ...,
+    ]
+)
 ```
 
 ## HuggingFace publishing

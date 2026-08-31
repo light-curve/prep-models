@@ -79,6 +79,7 @@ class AstromerConfig:
     output_prefix: str
     test_data_filename: str
 
+
 def download_weights(config: AstromerConfig) -> None: ...
 def run_test_data(
     config: AstromerConfig,
