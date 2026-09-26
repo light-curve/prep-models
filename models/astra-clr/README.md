@@ -6,7 +6,26 @@ Available from Python via the [`light-curve`](https://light-curve.snad.space/) p
 
 ## Paper
 
-Majumder et al., 2026, in prep.
+Majumder, T., Malanchev, K., Ishida, E. E. O. (2026). *Multi-Scale Contrastive Attention for Light-Curve Representation Learning*. [arXiv:2606.31627](https://arxiv.org/abs/2606.31627).
+
+```bibtex
+@ARTICLE{2026arXiv260631627M,
+       author = {{Majumder}, Torsha and {Malanchev}, Konstantin and {Ishida}, Emille E.~O.},
+        title = "{Multi-Scale Contrastive Attention for Light-Curve Representation Learning}",
+      journal = {arXiv e-prints},
+     keywords = {Instrumentation and Methods for Astrophysics},
+         year = 2026,
+        month = jun,
+          eid = {arXiv:2606.31627},
+        pages = {arXiv:2606.31627},
+          doi = {10.48550/arXiv.2606.31627},
+archivePrefix = {arXiv},
+       eprint = {2606.31627},
+ primaryClass = {astro-ph.IM},
+       adsurl = {https://ui.adsabs.harvard.edu/abs/2026arXiv260631627M},
+      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+```
 
 ## Original model
 
