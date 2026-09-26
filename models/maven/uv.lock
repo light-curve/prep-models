@@ -186,6 +186,45 @@ nvtx = [
 ]
 
 [[package]]
+name = "extinction"
+version = "0.4.9"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/af/1c/2de173b78af9297f9ba9c0ebbccb6e756dbac70c90d2cd4b3c6614e1feaf/extinction-0.4.9.tar.gz", hash = "sha256:25a0db297098c6e9bbc63f8ea7dfd5c3e4d00b6ea52cc23176102d31e364db87", size = 216431, upload-time = "2026-08-09T22:12:34.476Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c7/e3/d7c6fc4c99b91ce79e7f0329c5da5b4dd4dc43d5740b5b64e8ccfa2af85e/extinction-0.4.9-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:1a6a1e54bcab4a822098bb198ff759107cc3fb5279942955eb542fefe5bfc723", size = 107379, upload-time = "2026-08-09T22:11:51.441Z" },
+    { url = "https://files.pythonhosted.org/packages/1a/b6/57f29d9da4a76c6ecaed2308eaffa21aa7658f4c8743ed32667fd96a55d6/extinction-0.4.9-cp314-cp314-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:e84ba779fa9c9e8acc7cef39eceaaaaf86452ec3ec48d04c78dc3e238b0c381c", size = 607756, upload-time = "2026-08-09T22:11:52.723Z" },
+    { url = "https://files.pythonhosted.org/packages/72/78/9daccdce367c8e00b61f73eeeb6aacba50221fea541abefb441707d47314/extinction-0.4.9-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:71f756cb6d372d71825a3ec0b373ed94f1b8171abc1869f0ca206e27fa67f65e", size = 615245, upload-time = "2026-08-09T22:11:54.073Z" },
+    { url = "https://files.pythonhosted.org/packages/7a/1b/2690f90e9623710b7ceec69eeabc5b865e9270983a8e85a815d3ee3c90b2/extinction-0.4.9-cp314-cp314-musllinux_1_2_aarch64.whl", hash = "sha256:084604ad641ff984f5142280f648492f47147edf749bd23e221c39943fb438ab", size = 595207, upload-time = "2026-08-09T22:11:55.299Z" },
+    { url = "https://files.pythonhosted.org/packages/e0/c8/b3ef4211564b5b5bd5038effe2fe9392aef34db11c99b3e44fdd06d38594/extinction-0.4.9-cp314-cp314-musllinux_1_2_x86_64.whl", hash = "sha256:54303d9b022871ca130531b459efe7a8e416d3f4c9a3b1912b0448c4495b3a60", size = 609519, upload-time = "2026-08-09T22:11:56.671Z" },
+    { url = "https://files.pythonhosted.org/packages/47/48/c3eee863953f70c1a506a800943fdcc6fb65122720c76bebe940523dad00/extinction-0.4.9-cp314-cp314-win32.whl", hash = "sha256:03ba37c83c6485ada6e3c4d584b1abdf0ab43f6f6479dc59fa8dddd32e35427b", size = 78553, upload-time = "2026-08-09T22:11:58.038Z" },
+    { url = "https://files.pythonhosted.org/packages/9e/19/cdf8c5541629fe93ea07dff868557b56d7873a8ae5dd41be0e5ff746f787/extinction-0.4.9-cp314-cp314-win_amd64.whl", hash = "sha256:b1afc4afea02131c059f3b551c8596c73d8a843f8a240e6f030e4c7d4f53f499", size = 91538, upload-time = "2026-08-09T22:11:59.184Z" },
+    { url = "https://files.pythonhosted.org/packages/4a/c1/1046fbdc35ae27f4e9c6709002f8ebd0a0c299d0b949f103df04a110e21f/extinction-0.4.9-cp314-cp314t-macosx_11_0_arm64.whl", hash = "sha256:78972a8d17e8dc13f9d506c06574fe0557de7152052ae65bf7fd837ad15bdea2", size = 113445, upload-time = "2026-08-09T22:12:00.206Z" },
+    { url = "https://files.pythonhosted.org/packages/94/af/730c1cf0d25004618afe0367981f8cb3f05cf3ac7a78a0a150b46cf5099b/extinction-0.4.9-cp314-cp314t-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:9aac31f99a28e64be6feed866d5d36dd6fa2173838270c153d34e6a7d0d550a3", size = 621907, upload-time = "2026-08-09T22:12:01.308Z" },
+    { url = "https://files.pythonhosted.org/packages/3a/a8/9bae8486660f83ea46d6e5033fc8a7c93152bbfee6f570e39887e754435c/extinction-0.4.9-cp314-cp314t-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:185dff87ffee4092223838c869fa031dad61ebdffbf8ce8541ec6c805ec60e19", size = 606940, upload-time = "2026-08-09T22:12:02.599Z" },
+    { url = "https://files.pythonhosted.org/packages/d1/65/80bdb166e35ee11a2dff9a71216e7bdbe40268368e1262204810235ee9ed/extinction-0.4.9-cp314-cp314t-musllinux_1_2_aarch64.whl", hash = "sha256:1647d649a384037448f88bfc9ef357bc646c42151dc8a7ff8ecce079df8dd530", size = 599778, upload-time = "2026-08-09T22:12:03.914Z" },
+    { url = "https://files.pythonhosted.org/packages/42/6b/0c18efc48d0b4e40fe8c08d30b2342f70f4a58965fd7655db2b5b031782a/extinction-0.4.9-cp314-cp314t-musllinux_1_2_x86_64.whl", hash = "sha256:a3024f317a362c19a197973cb7fc91a849b3a0b2abc273ee03cbfdcf02de8167", size = 598352, upload-time = "2026-08-09T22:12:05.192Z" },
+    { url = "https://files.pythonhosted.org/packages/8d/d1/ed441138e2100f2a40e8a9f4d3c7a8178c280755a8fe2c13131768f79e82/extinction-0.4.9-cp314-cp314t-win32.whl", hash = "sha256:19975fb1c4baa3bebf7fa8a2e3dcd02caae40113ae0fa0e296b8d68329cf1b7a", size = 84720, upload-time = "2026-08-09T22:12:06.545Z" },
+    { url = "https://files.pythonhosted.org/packages/cc/9e/a2da52d8aa488523ad0eb891025ceaa71b1111b909fc808690e0519c582e/extinction-0.4.9-cp314-cp314t-win_amd64.whl", hash = "sha256:59c28f4c6a79763fadebb95c884831f7abc983e4eb59df339fc472b276548f96", size = 98586, upload-time = "2026-08-09T22:12:07.577Z" },
+    { url = "https://files.pythonhosted.org/packages/8e/0f/8ef0720a52a2431a59b8e1f58e29664e6a00ffd0eba9bb03208033dff21c/extinction-0.4.9-cp315-cp315-macosx_11_0_arm64.whl", hash = "sha256:aa2048b0126ba2f19356ac727075cb63ef5e9971458a0688b33ebd129e639c58", size = 107303, upload-time = "2026-08-09T22:12:08.626Z" },
+    { url = "https://files.pythonhosted.org/packages/5a/1d/5bde58e94509c4d96a4aeaef6eb6daec050c540d8b6ed42f5ab95fc4f3d4/extinction-0.4.9-cp315-cp315-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:de51b2fe37610c3eb4a49b315cbe3cd2c4f521e557c65d90f0465be3c46ad72f", size = 608796, upload-time = "2026-08-09T22:12:09.756Z" },
+    { url = "https://files.pythonhosted.org/packages/3f/8e/15e42448f8761ca6f867bcbfa6e265e05470ae0438eaf67880d01204ba5e/extinction-0.4.9-cp315-cp315-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:554171a861a74958b0089e79bcf1ea7bbc8504cc47f8fff63a8dde3ea2f8fd8a", size = 617320, upload-time = "2026-08-09T22:12:11.036Z" },
+    { url = "https://files.pythonhosted.org/packages/b6/6e/dbb83b09f8d1173c9486809fba2d7b6fb3b774ee2d7e30b2293034084c64/extinction-0.4.9-cp315-cp315-musllinux_1_2_aarch64.whl", hash = "sha256:f046eccf27f7e7e70d4acb659d18770edbf561a20d5f99c263cd686cf2a07668", size = 596504, upload-time = "2026-08-09T22:12:12.409Z" },
+    { url = "https://files.pythonhosted.org/packages/4f/1b/48f903b70d43b139a93297268c3cfe7ee934a520f83cc8372ad0443d7399/extinction-0.4.9-cp315-cp315-musllinux_1_2_x86_64.whl", hash = "sha256:3b92347143dffc96d75959f85701db76619ca034ec49828cae5d2ced2c4f441a", size = 611602, upload-time = "2026-08-09T22:12:13.74Z" },
+    { url = "https://files.pythonhosted.org/packages/e7/fc/85c4dbcd7faaf5cdda4620110e444032fbb9120198a63634db9bbec7f011/extinction-0.4.9-cp315-cp315-win32.whl", hash = "sha256:13bf67cf92ebee844cb73cf242592732c6db4eb4c042c7735b10bd358074a2bf", size = 78555, upload-time = "2026-08-09T22:12:15.03Z" },
+    { url = "https://files.pythonhosted.org/packages/84/c2/a1a99616137487947d01eed7eda0fcd4235ee63b892313f766a95c7d7c21/extinction-0.4.9-cp315-cp315-win_amd64.whl", hash = "sha256:5aa9deab98306e897495070b3fd8fd40c99aa973633880e6291b6a64f2bd4118", size = 91601, upload-time = "2026-08-09T22:12:16.09Z" },
+    { url = "https://files.pythonhosted.org/packages/00/e8/7bc02b8aa9d1402de7a5216cf12e40548de69a6ab06f2a5fe85a283d5116/extinction-0.4.9-cp315-cp315t-macosx_11_0_arm64.whl", hash = "sha256:616459e45654f3f0a8012f590a549fb514ef0007bd7c931630b16d08292836f4", size = 112995, upload-time = "2026-08-09T22:12:17.119Z" },
+    { url = "https://files.pythonhosted.org/packages/9d/4e/79d38816e34532bd1a4f4cb8eed3bc8bf9b60218120a95bf2eaa84e16871/extinction-0.4.9-cp315-cp315t-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:30703a9577775490e57ac48e724fd6bc6a9f49aace10a20dc014ab9e89b0a7e6", size = 619700, upload-time = "2026-08-09T22:12:18.247Z" },
+    { url = "https://files.pythonhosted.org/packages/cc/80/fe0755624cc4529aae0dc3b60df9a2ddbdd9aa555b018d1f987b9c51166b/extinction-0.4.9-cp315-cp315t-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:a0b8da302717ed5ba87ebc8a34c93877a15d1666e8f1cbb72dc7ca50d51a59fe", size = 615562, upload-time = "2026-08-09T22:12:19.752Z" },
+    { url = "https://files.pythonhosted.org/packages/ed/ef/f974162bc1e1ceda7a66b826254091923da670a4df1b2084496a7b204169/extinction-0.4.9-cp315-cp315t-musllinux_1_2_aarch64.whl", hash = "sha256:9bb24957a905072f454a09a6beb99813229f8831ab7ca426caa53e4cc36b37b1", size = 597387, upload-time = "2026-08-09T22:12:20.954Z" },
+    { url = "https://files.pythonhosted.org/packages/da/be/e429f6055d0f7706bff8068c304bedbb66880ba3318bc5ae4ab263769d93/extinction-0.4.9-cp315-cp315t-musllinux_1_2_x86_64.whl", hash = "sha256:a4d10bd379cc9e0fd8845618419bf2a175072b4aefff24f1af72f3c2a5702e53", size = 605648, upload-time = "2026-08-09T22:12:22.286Z" },
+    { url = "https://files.pythonhosted.org/packages/22/a3/32be493c917c5b38b0e3cae8c9777076736b51526398da5d7a4b079cc301/extinction-0.4.9-cp315-cp315t-win32.whl", hash = "sha256:a49a8faa4db4f240ce70bc7d705406f08cf1b557d9f1cee259f7c732bc467b62", size = 84891, upload-time = "2026-08-09T22:12:23.551Z" },
+    { url = "https://files.pythonhosted.org/packages/5d/74/585984ff05a5023b1b71ce4e3e89886b054bb2e92affa8d3faaba5d78ef6/extinction-0.4.9-cp315-cp315t-win_amd64.whl", hash = "sha256:983e68f230d8e15173eaf2904661bf9a2ae43156e41c56efed159c921663bcbb", size = 98393, upload-time = "2026-08-09T22:12:24.783Z" },
+]
+
+[[package]]
 name = "filelock"
 version = "4.0.3"
 source = { registry = "https://pypi.org/simple" }
@@ -267,6 +306,7 @@ name = "maven-prep"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "extinction" },
     { name = "numpy" },
     { name = "onnx" },
     { name = "onnxruntime" },
@@ -277,6 +317,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "extinction", specifier = ">=0.4.9" },
     { name = "numpy", specifier = ">=1.26" },
     { name = "onnx", specifier = ">=1.16" },
     { name = "onnxruntime", specifier = ">=1.17" },

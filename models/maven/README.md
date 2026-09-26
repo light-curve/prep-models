@@ -85,8 +85,9 @@ Magnitudes are used as-is (no normalization). Upstream fine-tuning adds Gaussian
 
 ## Test data
 
-`out/test-data/maven_test.parquet` contains synthetic ZTF-like two-band supernova light curves (Bazin flux model, irregular cadence, 5–150 observations per band), the preprocessed `input_mag`/`input_time`/`input_mask` arrays and the `embedding_mean`/`embedding_clip` outputs.
-Real ZTF BTS data is only available via the upstream [HuggingFace dataset](https://huggingface.co/datasets/thelfer/multimodal_supernovae); extinction correction is skipped for synthetic data.
+`out/test-data/maven_test.parquet` contains 10 real ZTF Bright Transient Survey supernovae, two per fine-tuning class (SN Ia, SN Ibc, SN II, SN IIn, SLSN-I), with observations in both bands.
+They are read from `data/ZTFBTS.zip` in the upstream repository (the same files as `ZTFBTS/` in the upstream [HuggingFace dataset](https://huggingface.co/datasets/thelfer/multimodal_supernovae)).
+Each row has `object_id` (ZTF ID), `class`, `a_v` (Milky Way A_V used for the extinction correction), the raw `lightcurve` (uncorrected magnitudes), the preprocessed `input_mag`/`input_time`/`input_mask` arrays and the `embedding_mean`/`embedding_clip` outputs.
 
 ## Weights
 
