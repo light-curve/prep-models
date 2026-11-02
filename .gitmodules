@@ -16,3 +16,6 @@
 [submodule "models/astromer1-ztfdr20/code"]
 	path = models/astromer1-ztfdr20/code
 	url = https://github.com/astromer-science/main-code
+[submodule "models/maven/code"]
+	path = models/maven/code
+	url = https://github.com/ThomasHelfer/multimodal-supernovae

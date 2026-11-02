@@ -51,6 +51,11 @@ _MODELS: dict = {
         "module": "astra_clr_prep",
         "hf_repo": f"{HF_ORG}/astra-clr",
     },
+    "maven": {
+        "project": REPO_ROOT / "models" / "maven",
+        "module": "maven_prep",
+        "hf_repo": f"{HF_ORG}/maven",
+    },
     "chronos2": {
         "project": REPO_ROOT / "models" / "chronos2",
         "module": "chronos2_prep",

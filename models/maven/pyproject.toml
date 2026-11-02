@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "maven-prep"
+version = "0.1.0"
+description = "Maven light-curve encoder ONNX export sub-package"
+requires-python = ">=3.14"
+dependencies = [
+    "numpy>=1.26",
+    "onnx>=1.16",
+    "onnxruntime>=1.17",
+    "pyarrow>=14",
+    "torch>=2.3",
+    "prep-models-utils",
+    "extinction>=0.4.9",
+]
+
+[tool.uv.sources]
+prep-models-utils = { path = "../../utils", editable = true }
+
+[tool.setuptools.packages.find]
+include = ["maven_prep*"]
