@@ -15,21 +15,27 @@ Available from Python via the [`light-curve`](https://light-curve.snad.space/) p
 
 ## Paper
 
-Becker, I., Pignata, G., Förster, F., Estévez, P. A., Cabrera-Vives, G., Vera, E., Carrasco-Davis, R., Astorga, N., Sanchez-Saez, P., Catelan, M., Cortés, C. C., de Jaeger, T., Pezoa, F., & Reyes, I. (2024). *ATAT: Astronomical Transformer for time series And Tabular data*. Astronomy & Astrophysics, 691, A163.
+Cabrera-Vives, G., Moreno-Cartagena, D., Astorga, N., Reyes-Jainaga, I., Förster, F., Huijse, P., Arredondo, J., Muñoz Arancibia, A. M., Bayo, A., Catelan, M., Estévez, P. A., Sánchez-Sáez, P., Álvarez, A., Castellanos, P., Gallardo, P., Moya, A., & Rodriguez-Mancini, D. (2024). *ATAT: Astronomical Transformer for time series and Tabular data*. Astronomy & Astrophysics, 689, A289. [doi:10.1051/0004-6361/202449475](https://doi.org/10.1051/0004-6361/202449475), [arXiv:2405.03078](https://arxiv.org/abs/2405.03078), [ADS](https://ui.adsabs.harvard.edu/abs/2024A%26A...689A.289C).
 
 ```bibtex
-@article{atat2024,
-  author  = {Becker, I. and Pignata, G. and F{\"{o}}rster, F. and
-             Est{\'e}vez, P. A. and Cabrera-Vives, G. and Vera, E. and
-             Carrasco-Davis, R. and Astorga, N. and Sanchez-Saez, P. and
-             Catelan, M. and Cort{\'e}s, C. C. and {de Jaeger}, T. and
-             Pezoa, F. and Reyes, I.},
-  title   = {{ATAT}: Astronomical Transformer for time series And Tabular data},
+@article{2024A&A...689A.289C,
+  author  = {{Cabrera-Vives}, G. and {Moreno-Cartagena}, D. and {Astorga}, N. and
+             {Reyes-Jainaga}, I. and {F{\"o}rster}, F. and {Huijse}, P. and
+             {Arredondo}, J. and {Mu{\~n}oz Arancibia}, A.~M. and {Bayo}, A. and
+             {Catelan}, M. and {Est{\'e}vez}, P.~A. and {S{\'a}nchez-S{\'a}ez}, P. and
+             {{\'A}lvarez}, A. and {Castellanos}, P. and {Gallardo}, P. and
+             {Moya}, A. and {Rodriguez-Mancini}, D.},
+  title   = {{ATAT}: Astronomical Transformer for time series and Tabular data},
   journal = {Astronomy \& Astrophysics},
   year    = {2024},
-  volume  = {691},
-  pages   = {A163},
-  doi     = {10.1051/0004-6361/202451418},
+  month   = sep,
+  volume  = {689},
+  eid     = {A289},
+  pages   = {A289},
+  doi     = {10.1051/0004-6361/202449475},
+  eprint  = {2405.03078},
+  archivePrefix = {arXiv},
+  primaryClass  = {astro-ph.IM},
 }
 ```
 
